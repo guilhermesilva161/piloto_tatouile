@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Categorias</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <style>
+    body {
+      font-family: ui-monospace, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    }
+  </style>
+</head>
+<body class="bg-[#04103a] min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
+
+  <header class="flex items-center space-x-2 mb-4">
+    <button aria-label="Voltar" onclick="history.back()" class="text-white text-lg hover:text-[#3a6fff] transition-colors">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h1 class="text-white font-semibold text-lg">Categorias</h1>
+  </header>
+
+  <main class="flex flex-col sm:flex-row gap-6" id="main-content">
+    <section class="text-white text-sm leading-relaxed w-full sm:max-w-md">
+      <p class="mb-2">Categorias:</p>
+      <ul id="categoria-list" class="border border-[#1a2a5e] p-4 space-y-1 w-full sm:max-w-md max-h-96 overflow-y-auto">
+        <!-- categorias serão inseridas aqui via JS -->
+      </ul>
+    </section>
+  </main>
+
+  <section id="add-categoria-page" class="hidden flex flex-col items-center bg-[#000c2d] min-h-screen p-6">
+    <header class="w-full max-w-xs flex items-center bg-[#134a8e] h-10 rounded-b-md relative mb-6">
+      <button aria-label="Voltar" id="back-from-add" class="text-white text-lg pl-2 flex items-center justify-center w-10 h-10">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <div class="absolute left-1/2 -translate-x-1/2 top-1 rounded-md border border-white bg-[#134a8e] text-white text-sm font-semibold px-4 py-[2px]">
+        Categorias
+      </div>
+    </header>
+
+    <main class="w-full max-w-xs flex flex-col items-center space-y-4">
+      <input id="categoria-nome" type="text" placeholder="Nome da Categoria" class="w-full max-w-xs rounded border-0 bg-[#134a8e] text-white text-xs font-semibold text-center py-1" autocomplete="off" />
+      <button id="save-categoria-btn" class="bg-white text-black text-xs font-bold rounded px-3 py-1 self-end" type="button">
+        SALVAR
+      </button>
+    </main>
+  </section>
+
+  <button id="add-categoria-btn" aria-label="Adicionar" class="fixed bottom-6 right-6 bg-white text-[#0a1e5e] rounded-md w-10 h-10 flex justify-center items-center text-2xl font-bold shadow-md hover:bg-[#e5e5e5] transition-colors z-30">
+    +
+  </button>
+
+  <script>
+    const categorias = ["Carne", "Frango", "Peixe"];
+    const categoriaList = document.getElementById("categoria-list");
+    const addCategoriaBtn = document.getElementById("add-categoria-btn");
+    const addCategoriaPage = document.getElementById("add-categoria-page");
+    const mainContent = document.getElementById("main-content");
+    const backFromAddBtn = document.getElementById("back-from-add");
+    const categoriaNomeInput = document.getElementById("categoria-nome");
+    const saveCategoriaBtn = document.getElementById("save-categoria-btn");
+
+    let editIndex = null;
+
+    function renderCategorias() {
+      categoriaList.innerHTML = "";
+      categorias.forEach((nome, index) => {
+        const li = document.createElement("li");
+        li.className = "flex justify-between items-center";
+
+        const span = document.createElement("span");
+        span.textContent = nome;
+        span.className = "cursor-pointer underline hover:text-[#3a6fff]";
+        span.addEventListener("click", () => openEditCategoria(index));
+        li.appendChild(span);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.className = "text-[#d90000] hover:text-white text-xs";
+        deleteBtn.addEventListener("click", () => {
+          categorias.splice(index, 1);
+          renderCategorias();
+        });
+        li.appendChild(deleteBtn);
+
+        categoriaList.appendChild(li);
+      });
+    }
+
+    function openAddCategoria() {
+      mainContent.style.display = "none";
+      addCategoriaPage.style.display = "flex";
+      categoriaNomeInput.value = "";
+      categoriaNomeInput.focus();
+      editIndex = null;
+    }
+
+    function openEditCategoria(index) {
+      mainContent.style.display = "none";
+      addCategoriaPage.style.display = "flex";
+      categoriaNomeInput.value = categorias[index];
+      categoriaNomeInput.focus();
+      editIndex = index;
+    }
+
+    function backToList() {
+      mainContent.style.display = "flex";
+      addCategoriaPage.style.display = "none";
+    }
+
+    saveCategoriaBtn.addEventListener("click", () => {
+      const nome = categoriaNomeInput.value.trim();
+      if (nome === "") {
+        alert("O nome da categoria não pode ser vazio.");
+        return;
+      }
+
+      if (editIndex !== null) {
+        categorias[editIndex] = nome;
+        editIndex = null;
+      } else {
+        categorias.push(nome);
+      }
+
+      backToList();
+      renderCategorias();
+    });
+
+    addCategoriaBtn.addEventListener("click", openAddCategoria);
+    backFromAddBtn.addEventListener("click", backToList);
+
+    renderCategorias();
+  </script>
+</body>
+</html>

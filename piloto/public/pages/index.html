@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Login</title>
+</head>
+<body>
+    <div id="container">
+        <div class="logo">
+            <img src="../imagens/logo.png" alt="logo_tatouille" width="430" height="449">
+        </div>
+        <div class="box">
+            <h1>L o g i n</h1>
+            <form id="loginForm">
+                <label for="email"></label>
+                <input type="text" placeholder="nome:" class="inputs" id="email"> <br> <br>
+                <label for="senha"></label>
+                <input type="password" placeholder="senha:" class="inputs" id="senha"> <br> <br>
+
+                <button type="submit" class="botao">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Função para validar o login
+        document.getElementById('loginForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+
+            // Enviando os dados
+            try {
+                const response = await fetch('/api/crud/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, senha }) // Envia email e senha como JSON
+                });
+
+                const data = await response.json(); // Parseia a resposta como JSON
+
+                if (response.ok) {
+    const cargo = data.usuario.cargo;
+
+    alert(data.mensagem);
+
+    switch (cargo) {
+        case 'Administrador':
+            window.location.href = '/pages/home_adm.html';
+            break;
+        case 'Chefe':
+            window.location.href = '/pages/home_chefe.html';
+            break;
+        case 'degustador':
+            window.location.href = '/pages/home_degustador.html';
+            break;
+        default:
+            alert('Cargo não reconhecido!');
+    }
+}
+            } catch (error) {
+                console.error('Erro ao tentar fazer login:', error);
+                alert('Erro na comunicação com o servidor.');
+            }
+        });
+    </script>
+
+</body>
+</html>
