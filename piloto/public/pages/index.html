@@ -34,7 +34,7 @@
 
             // Enviando os dados
             try {
-                const response = await fetch('/api/crud/login', {
+                const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -50,10 +50,10 @@
     alert(data.mensagem);
 
     switch (cargo) {
-        case 'Administrador':
+        case 2:
             window.location.href = '/pages/home_adm.html';
             break;
-        case 'Chefe':
+        case 1:
             window.location.href = '/pages/home_chefe.html';
             break;
         case 'degustador':

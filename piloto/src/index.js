@@ -2,9 +2,9 @@
 // Import de dependenecias
 const express = require('express'); //express (servidor)
 const path = require('path'); //path (caminho de pastas) 
-const mysql = require('mysql2'); //mysql (banco)
-const bodyParser = require('body-parser');
-const crudRoutes = require('./routes/crudRoutes'); 
+const loginRoutes= require('./routes/loginRoutes'); 
+const cargoRoutes = require('./routes/cargoRoutes');
+const funcionarioRoutes = require('./routes/funcionarioRoutes');
 
 const app = express();
 
@@ -13,11 +13,19 @@ const app = express();
 
 app.use(express.json());  // Middleware para lidar com JSON no corpo das requisições
 
-// Usar as rotas CRUD
-app.use('/api/crud', crudRoutes);
 
 // Servindo arquivos estáticos (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, '../public')));
+
+// Usar as rotas Login
+app.use('/api/login', loginRoutes);
+
+// Usando o roteador de Cargo
+app.use('/api/cargos', cargoRoutes);
+
+// Usando o roteador de Funcionarios
+app.use('/api/funcionarios', funcionarioRoutes);
+
 
 app.get('/', (req, res) => {
   // Envia o index.html da pasta 'public/pages'

@@ -326,4 +326,16 @@ VALUES (
 INSERT INTO Usuarios (email, senha, FKfuncionario)
 VALUES ('exemplo123@gmail.com', 'senha_aqui', 1);
 
+
+//ALTERAR NO BANCO DEPOIS 
+ALTER TABLE usuarios
+DROP FOREIGN KEY fk_Usuarios_Funcionario1;
+
+ALTER TABLE usuarios
+ADD CONSTRAINT fk_Usuarios_Funcionario1
+FOREIGN KEY (FKfuncionario)
+REFERENCES funcionario(idFuncionario)
+ON DELETE CASCADE;
+
+
  */

@@ -1,30 +1,3 @@
-const crudModel = require('../models/crudModel');
-
-// Serviço para criar
-async function create(table, data) {
-  const result = await crudModel.create(table, data);
-  return result;
-}
-
-// Serviço para ler
-async function read(table) {
-  const result = await crudModel.read(table);
-  return result;
-}
-
-// Serviço para atualizar
-async function update(table, id, data) {
-  const result = await crudModel.update(table, id, data);
-  return result;
-}
-
-// Serviço para deletar
-async function del(table, id) {
-  const result = await crudModel.del(table, id);
-  return result;
-}
-
-
 ///Verificar Login
 const db = require('../database/conexao');
 
@@ -32,7 +5,7 @@ async function verificarLogin(email, senha) {
   try {
     console.log(`Verificando login para: ${email}`);
     const query = `
-      SELECT u.idUsuarios, u.email, u.senha, f.nome, c.descricao AS cargo
+      SELECT u.idUsuarios, u.email, u.senha, f.nome, idCargo AS cargo
       FROM Usuarios u
       JOIN Funcionario f ON u.FKfuncionario = f.idFuncionario
       JOIN Cargo c ON f.Cargo_idCargo = c.idCargo
@@ -54,10 +27,6 @@ async function verificarLogin(email, senha) {
 }
 
 module.exports = {
-  create,
-  read,
-  update,
-  del,
   verificarLogin
 };
 
