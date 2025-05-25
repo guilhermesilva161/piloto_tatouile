@@ -34,6 +34,12 @@
     .center {
       text-align: center;
     }
+
+    select{
+      width: 20%;
+      height: 40px;
+    }
+
   </style>
 </head>
 <body>
@@ -51,7 +57,8 @@
       <tr>
         <th>ID</th>
         <th>Nome</th>
-        <th>ID do Cargo</th>
+        <th>Cargo</th>
+        <th>Ações</th> 
       </tr>
     </thead>
     <tbody></tbody>
@@ -66,9 +73,12 @@
     <input type="text" id="nome" placeholder="Nome completo" required /><br>
     <input type="date" id="dt_admissao" placeholder="Data de admissão" required /><br>
     <input type="number" step="0.01" id="salario" placeholder="Salário (ex: 3000.00)" required /><br>
-    <input type="text" id="nome_fantasia" placeholder="Nome fantasia (opcional)" /><br>
-    <input type="number" id="Cargo_idCargo" placeholder="ID do Cargo" required /><br>
-
+    <input type="text" id="nome_fantasia" placeholder="Nome fantasia (opcional)" /><br> <br>
+    <select id="Cargo_idCargo" required>
+      <option value="">Selecione o cargo</option>
+    </select>
+    <br>
+    <br>
     <button type="submit">Salvar</button>
     <button type="button" onclick="voltarTabela()">Cancelar</button>
   </form>
@@ -86,14 +96,60 @@
           row.innerHTML = `
             <td>${f.idFuncionario}</td>
             <td>${f.nome}</td>
-            <td>${f.Cargo_idCargo}</td>
+             <td>${f.descricao_cargo}</td>
+            <td>
+              <button onclick="excluirFuncionario(${f.idFuncionario})">Excluir</button>
+              <button onclick="editarFuncionario(${f.idFuncionario})">Editar</button>
+              </td>
           `;
           tbody.appendChild(row);
         });
       });
   }
 
+
+
+function editarFuncionario(id) {
+  fetch(`/api/funcionarios/${id}`)
+    .then(res => res.json())
+    .then(f => {
+      document.getElementById('formFuncionario').dataset.editingId = f.idFuncionario;
+      document.getElementById('rg').value = f.rg;
+      document.getElementById('nome').value = f.nome;
+      document.getElementById('dt_admissao').value = f.dt_admissao;
+      document.getElementById('salario').value = f.salario;
+      document.getElementById('nome_fantasia').value = f.nome_fantasia || '';
+      
+      carregarCargosNoSelect(); // para garantir opções atualizadas
+      setTimeout(() => {
+        document.getElementById('Cargo_idCargo').value = f.Cargo_idCargo;
+      }, 100);
+
+      mostrarFormulario();
+    })
+    .catch(error => console.error('Erro ao carregar funcionário:', error));
+}
+
+function carregarCargosNoSelect() {
+  fetch('/api/cargos')
+    .then(res => res.json())
+    .then(cargos => {
+      console.log('Cargos carregados:', cargos); 
+      const select = document.getElementById('Cargo_idCargo');
+      select.innerHTML = '<option value="">Selecione o cargo</option>'; // reset
+
+      cargos.forEach(cargo => {
+        const option = document.createElement('option');
+        option.value = cargo.idCargo;          // o valor enviado no formulário é o id
+        option.textContent = cargo.descricao;  // o texto visível é a descrição
+        select.appendChild(option);
+      });
+    })
+    .catch(err => console.error('Erro ao carregar cargos:', err));
+}
+
   function mostrarFormulario() {
+    carregarCargosNoSelect();
     document.getElementById('paginaTabela').classList.add('hidden');
     document.getElementById('paginaFormulario').classList.remove('hidden');
   }
@@ -103,45 +159,66 @@
     document.getElementById('paginaTabela').classList.remove('hidden');
   }
 
-  document.getElementById('formFuncionario').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const rg = parseInt(document.getElementById('rg').value);
-    const nome = document.getElementById('nome').value;
-    const dt_admissao = document.getElementById('dt_admissao').value;
-    const salario = parseFloat(document.getElementById('salario').value);
-    const nome_fantasia = document.getElementById('nome_fantasia').value.trim() || null;
-    const foto_func = null;
-    const Cargo_idCargo = parseInt(document.getElementById('Cargo_idCargo').value);
-
-    const dados = {
-      rg,
-      nome,
-      dt_admissao,
-      salario,
-      nome_fantasia,
-      foto_func,
-      Cargo_idCargo
-    };
-
-    fetch('/api/funcionarios', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(dados)
+  function excluirFuncionario(id) {
+  if (confirm('Tem certeza que deseja excluir este funcionário?')) {
+    fetch(`/api/funcionarios/${id}`, {
+      method: 'DELETE'
     })
     .then(res => {
-      if (!res.ok) throw new Error('Erro ao adicionar funcionário');
+      if (!res.ok) throw new Error('Erro ao excluir funcionário');
       return res.json();
     })
     .then(() => {
-      document.getElementById('formFuncionario').reset();
-      voltarTabela();
-      carregarFuncionarios();
+      carregarFuncionarios(); // atualiza a tabela
     })
     .catch(error => console.error('Erro:', error));
-  });
+  }
+}
+
+  document.getElementById('formFuncionario').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const editingId = this.dataset.editingId;
+  const rg = parseInt(document.getElementById('rg').value);
+  const nome = document.getElementById('nome').value;
+  const dt_admissao = document.getElementById('dt_admissao').value;
+  const salario = parseFloat(document.getElementById('salario').value);
+  const nome_fantasia = document.getElementById('nome_fantasia').value.trim() || null;
+  const foto_func = null;
+  const Cargo_idCargo = parseInt(document.getElementById('Cargo_idCargo').value);
+
+  const dados = {
+    rg,
+    nome,
+    dt_admissao,
+    salario,
+    nome_fantasia,
+    foto_func,
+    Cargo_idCargo
+  };
+
+  const url = editingId ? `/api/funcionarios/${editingId}` : '/api/funcionarios';
+  const method = editingId ? 'PUT' : 'POST';
+
+  fetch(url, {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(dados)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Erro ao salvar funcionário');
+    return res.json();
+  })
+  .then(() => {
+    this.reset();
+    delete this.dataset.editingId;
+    voltarTabela();
+    carregarFuncionarios();
+  })
+  .catch(error => console.error('Erro:', error));
+});
 
   carregarFuncionarios();
 </script>

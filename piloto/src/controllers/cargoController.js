@@ -2,11 +2,11 @@ const pool = require('../database/conexao'); // Importando a pool de conexão
 
 // Função para criar um novo cargo
 exports.createCargo = async (req, res) => {
-  const {IdCargo, descricao, data_inicio, data_fim, ind_ativo } = req.body;
+  const {descricao, data_inicio, data_fim, ind_ativo } = req.body;
   try {
-    const [result] = await pool.query('INSERT INTO Cargo (IdCargo, descricao, data_inicio, data_fim, ind_ativo) VALUES (?,?, ?, ?, ?)', 
-                                      [IdCargo,descricao, data_inicio, data_fim, ind_ativo]);
-    res.status(201).json({ IdCargo, descricao, data_inicio, data_fim, ind_ativo });
+    const [result] = await pool.query('INSERT INTO Cargo (descricao, data_inicio, data_fim, ind_ativo) VALUES (?, ?, ?, ?)', 
+                                      [descricao, data_inicio, data_fim, ind_ativo]);
+    res.status(201).json({ idCargo: result.insertId, descricao, data_inicio, data_fim, ind_ativo });
     console.log("Cargo criado com sucesso");
 
   } catch (error) {

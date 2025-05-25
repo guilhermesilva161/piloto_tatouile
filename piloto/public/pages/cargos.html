@@ -20,7 +20,7 @@
       border: 1px solid #ccc;
       padding: 10px;
       text-align: left;
-      color: white;
+      color:white;
     }
     th {
       color: #f0f0f0;
@@ -36,6 +36,10 @@
     button {
       cursor: pointer;
     }
+    .excluir{
+      color: black;
+      background-color: red;
+    }
   </style>
 </head>
 <body>
@@ -49,6 +53,7 @@
         <tr>
           <th>ID</th>
           <th>Descrição</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -59,7 +64,7 @@
   <div id="paginaFormulario" class="hidden">
     <h1>Adicionar Novo Cargo</h1>
     <form id="formCargo">
-      <input type="number" id="IdCargo" placeholder="ID do cargo" required />
+      <input type="number" id="IdCargo" placeholder="ID do cargo"/>
       <br>
       <input type="text" id="descricao" placeholder="Descrição do cargo" required />
       <br>
@@ -76,6 +81,9 @@
   </div>
 
   <script>
+
+  let modoEdicao = false;
+
     
   const tbody = document.querySelector('#tabelaCargos tbody');
 
@@ -89,6 +97,10 @@
           row.innerHTML = `
             <td>${cargo.idCargo}</td>
             <td>${cargo.descricao}</td>
+            <td>
+                <button class="excluir" onclick="excluirCargo(${cargo.idCargo})">X</button>
+                <button onclick="editarCargo(${cargo.idCargo})">Editar</button>
+            </td>
           `;
           tbody.appendChild(row);
         });
@@ -98,7 +110,48 @@
       });
   }
 
+
+  function excluirCargo(id) {
+  if (confirm('Tem certeza que deseja excluir este cargo?')) {
+    fetch(`/api/cargos/${id}`, {
+      method: 'DELETE'
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Erro ao excluir cargo');
+      alert("Não é possivel excluir um cargo que tem funcionários");
+      return response.json();
+    })
+    .then(() => {
+      carregarCargos(); // Atualiza a tabela
+      
+    })
+    .catch(error => console.error('Erro ao excluir:', error));
+    alert("Não é possivel excluir um cargo que tem funcionários");
+  }
+}
+
+function editarCargo(id) {
+  modoEdicao = true; 
+  // Encontre o cargo pelo ID
+  fetch(`/api/cargos/${id}`)
+    .then(response => response.json())
+    .then(cargo => {
+      // Preencher o formulário com os dados do cargo
+      document.getElementById('IdCargo').value = cargo.idCargo;
+      document.getElementById('descricao').value = cargo.descricao;
+    document.getElementById('data_inicio').value = cargo.data_inicio ? cargo.data_inicio.split('T')[0] : '';
+      document.getElementById('data_fim').value = cargo.data_fim || '';
+      document.getElementById('ind_ativo').value = cargo.ind_ativo;
+
+      // Mudar para a página de formulário
+      document.getElementById('paginaTabela').classList.add('hidden');
+      document.getElementById('paginaFormulario').classList.remove('hidden');
+    })
+    .catch(error => console.error('Erro ao carregar cargo:', error));
+}
+
   function mostrarFormulario() {
+    modoEdicao = false; 
     document.getElementById('paginaTabela').classList.add('hidden');
     document.getElementById('paginaFormulario').classList.remove('hidden');
   }
@@ -107,32 +160,40 @@
     document.getElementById('paginaFormulario').classList.add('hidden');
     document.getElementById('paginaTabela').classList.remove('hidden');
   }
+document.getElementById('formCargo').addEventListener('submit', function (e) {
+  e.preventDefault();
 
-  document.getElementById('formCargo').addEventListener('submit', function (e) {
-    e.preventDefault();
+  const IdCargo = document.getElementById('IdCargo').value;
+  const descricao = document.getElementById('descricao').value;
+  const data_inicio = document.getElementById('data_inicio').value;
+  const data_fim = document.getElementById('data_fim').value || null;
+  const ind_ativo = document.getElementById('ind_ativo').value;
 
-    const IdCargo = document.getElementById('IdCargo').value;
-    const descricao = document.getElementById('descricao').value;
-    const data_inicio = document.getElementById('data_inicio').value;
-    const data_fim = document.getElementById('data_fim').value || null;
-    const ind_ativo = document.getElementById('ind_ativo').value;
+const method = modoEdicao ? 'PUT' : 'POST';
+const url = modoEdicao ? `/api/cargos/${IdCargo}` : '/api/cargos';
 
-    fetch('/api/cargos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ IdCargo, descricao, data_inicio, data_fim, ind_ativo })
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Erro ao adicionar cargo');
-      return response.json();
-    })
-    .then(() => {
-      document.getElementById('formCargo').reset();
-      voltarTabela();
-      carregarCargos();
-    })
-    .catch(error => console.error('Erro ao salvar:', error));
-  });
+  fetch(url, {
+    method: method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ IdCargo:IdCargo, descricao, data_inicio, data_fim, ind_ativo })
+  })
+.then(response => {
+  if (!response.ok) {
+    return response.text().then(text => {
+      console.error('Erro detalhado da API:', text);  // <--- log útil
+      throw new Error('Erro ao salvar cargo');
+    });
+  }
+  return response.json();
+})
+  .then(() => {
+    document.getElementById('formCargo').reset();
+    voltarTabela();
+    carregarCargos();
+  })
+  .catch(error => console.error('Erro ao salvar:', error));
+});
+
 
   carregarCargos();
 </script>

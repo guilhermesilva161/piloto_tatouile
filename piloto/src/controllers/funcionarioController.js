@@ -19,7 +19,12 @@ const criarFuncionario = async (req, res) => {
 // Listar todos os funcionários
 const listarFuncionarios = async (req, res) => {
   try {
-    const [rows] = await pool.execute('SELECT * FROM Funcionario');
+    const query = `
+      SELECT f.*, c.descricao AS descricao_cargo
+      FROM Funcionario f
+      JOIN Cargo c ON f.Cargo_idCargo = c.idCargo
+    `;
+    const [rows] = await pool.execute(query);
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);

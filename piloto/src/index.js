@@ -5,6 +5,7 @@ const path = require('path'); //path (caminho de pastas)
 const loginRoutes= require('./routes/loginRoutes'); 
 const cargoRoutes = require('./routes/cargoRoutes');
 const funcionarioRoutes = require('./routes/funcionarioRoutes');
+const categoriaRoutes = require('./routes/categoriaRoutes');
 
 const app = express();
 
@@ -25,6 +26,9 @@ app.use('/api/cargos', cargoRoutes);
 
 // Usando o roteador de Funcionarios
 app.use('/api/funcionarios', funcionarioRoutes);
+
+// Usando o roteador de Categorias
+app.use('/api/categoria', categoriaRoutes);
 
 
 app.get('/', (req, res) => {

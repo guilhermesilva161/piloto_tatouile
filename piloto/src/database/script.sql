@@ -24,7 +24,7 @@ USE `AcervoRct` ;
 -- Table `AcervoRct`.`Cargo`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AcervoRct`.`Cargo` (
-  `idCargo` INT NOT NULL COMMENT 'Atributo identificador do cargo.',
+  `idCargo` INT NOT NULL AUTO_INCREMENT COMMENT 'Atributo identificador do cargo.',
   `descricao` CHAR(15) NOT NULL COMMENT 'Descrição do cargo',
   `data_inicio` DATE NOT NULL COMMENT 'Data do início do cargo',
   `data_fim` DATE NULL COMMENT 'Data do fim do cargo',
@@ -55,26 +55,46 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Funcionario` (
 ENGINE = InnoDB;
 
 
+
+
+-- -----------------------------------------------------
+-- Table `AcervoRct`.`Categoria`
+-- -----------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `AcervoRct`.`Categoria` (
+  `idCategoria` INT NOT NULL AUTO_INCREMENT COMMENT 'Identificador da categoria',
+  `nome` VARCHAR(45) NOT NULL COMMENT 'Nome da categoria (ex: Sobremesa, Prato Principal)',
+  PRIMARY KEY (`idCategoria`)
+) ENGINE = InnoDB;
+
+
 -- -----------------------------------------------------
 -- Table `AcervoRct`.`Receita`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AcervoRct`.`Receita` (
-  `nome_rct` VARCHAR(50) NOT NULL COMMENT 'Nome da receita\n',
-  `idReceita` INT NOT NULL AUTO_INCREMENT COMMENT 'Contém o identificador único da receita',
+  `nome_rct` VARCHAR(50) NOT NULL COMMENT 'Nome da receita',
+  `idReceita` INT NOT NULL AUTO_INCREMENT COMMENT 'Identificador único da receita',
   `dt_criacao` DATE NOT NULL COMMENT 'Data da criação da receita por um cozinheiro.',
-  `cozinheiro` INT NOT NULL COMMENT 'Id do cozinheiro que publicou a receita',
-  `preparo` VARCHAR(5000) NOT NULL COMMENT 'Modo de preparo\n',
-  `quantidade_porcao` DECIMAL(3,1) NOT NULL COMMENT 'Quantidade de porções obtidas nesta receita\n',
-  `ind_rec_inedita` CHAR(1) NOT NULL COMMENT 'Indicador de receita inédita\n',
+  `cozinheiro` INT NOT NULL COMMENT 'ID do cozinheiro que publicou a receita',
+  `preparo` VARCHAR(5000) NOT NULL COMMENT 'Modo de preparo',
+  `quantidade_porcao` DECIMAL(3,1) NOT NULL COMMENT 'Quantidade de porções obtidas nesta receita',
+  `ind_rec_inedita` CHAR(1) NOT NULL COMMENT 'Indicador de receita inédita',
+  `FKcategoria` INT NOT NULL COMMENT 'Chave estrangeira da categoria da receita',
   PRIMARY KEY (`nome_rct`, `cozinheiro`),
-  INDEX `fk_Receita_Funcionario_idx` (`cozinheiro` ASC) VISIBLE,
-  UNIQUE INDEX `idReceita_UNIQUE` (`idReceita` ASC) VISIBLE,
+  UNIQUE INDEX `idReceita_UNIQUE` (`idReceita` ASC),
+  INDEX `fk_Receita_Funcionario_idx` (`cozinheiro` ASC),
+  INDEX `fk_Receita_Categoria_idx` (`FKcategoria` ASC),
   CONSTRAINT `fk_Receita_Funcionario`
     FOREIGN KEY (`cozinheiro`)
     REFERENCES `AcervoRct`.`Funcionario` (`idFuncionario`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Receita_Categoria`
+    FOREIGN KEY (`FKcategoria`)
+    REFERENCES `AcervoRct`.`Categoria` (`idCategoria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -102,18 +122,18 @@ ENGINE = InnoDB;
 -- Table `AcervoRct`.`Receita contem ingrediente`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AcervoRct`.`Receita contem ingrediente` (
-  `FKnome_rct` VARCHAR(50) NOT NULL COMMENT 'Identificador - Nome da receita\n',
+  `FKnome_rct` VARCHAR(50) NOT NULL COMMENT 'Identificador - Nome da receita',
   `FKcozinheiro` INT NOT NULL COMMENT 'Chave estrangeira identificadora - Identificador do cozinheiro',
   `FKidIngrediente` INT NOT NULL COMMENT 'Chave estrangeira identificadora - Identificador de ingrediente',
-  `FKMedida` INT NOT NULL COMMENT 'Chave estrangeira não identificadora - Identificador do cozinheiro',
+  `FKMedida` INT NOT NULL COMMENT 'Chave estrangeira não identificadora - Identificador da medida',
   `quant_ingrediente` DECIMAL(5,1) NOT NULL COMMENT 'Quantidade de ingredientes usados',
   PRIMARY KEY (`FKnome_rct`, `FKcozinheiro`, `FKidIngrediente`),
-  INDEX `fk_Receita_has_Ingrediente_Ingrediente1_idx` (`FKidIngrediente` ASC) VISIBLE,
-  INDEX `fk_Receita_has_Ingrediente_Receita1_idx` (`FKcozinheiro` ASC, `FKnome_rct` ASC) VISIBLE,
-  INDEX `fk_Receita_has_Ingrediente_Medida1_idx` (`FKMedida` ASC) VISIBLE,
+  INDEX `fk_Receita_has_Ingrediente_Ingrediente1_idx` (`FKidIngrediente` ASC),
+  INDEX `fk_Receita_has_Ingrediente_Receita1_idx` (`FKnome_rct` ASC, `FKcozinheiro` ASC),
+  INDEX `fk_Receita_has_Ingrediente_Medida1_idx` (`FKMedida` ASC),
   CONSTRAINT `fk_Receita_has_Ingrediente_Receita1`
-    FOREIGN KEY (`FKcozinheiro` , `FKnome_rct`)
-    REFERENCES `AcervoRct`.`Receita` (`cozinheiro` , `nome_rct`)
+    FOREIGN KEY (`FKnome_rct`, `FKcozinheiro`)
+    REFERENCES `AcervoRct`.`Receita` (`nome_rct`, `cozinheiro`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Receita_has_Ingrediente_Ingrediente1`
@@ -125,8 +145,9 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Receita contem ingrediente` (
     FOREIGN KEY (`FKMedida`)
     REFERENCES `AcervoRct`.`Medida` (`idMedida`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
 
 
 -- -----------------------------------------------------
