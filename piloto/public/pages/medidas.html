@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Tabela de Medidas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #000937;
+      color: white;
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      width: 60%;
+      margin: auto;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+      color:white;
+    }
+    th {
+      color: #f0f0f0;
+    }
+    .hidden {
+      display: none;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+    }
+    .excluir{
+      color: black;
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Página da Tabela -->
+  <div id="paginaTabela">
+    <h1>Lista de Medidas</h1>
+    <button onclick="mostrarFormulario()">Adicionar Medida</button>
+    <table id="tabelaMedida">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Página do Formulário -->
+  <div id="paginaFormulario" class="hidden">
+    <h1>Adicionar Nova Medida</h1>
+    <form id="formMedida">
+      <input type="hidden" id="idMedida" />
+      <br>
+      <input type="text" id="descricao" placeholder="Nome da Medida" required />
+      <br>
+      <button type="submit">Salvar</button>
+      <button type="button" onclick="voltarTabela()">Cancelar</button>
+    </form>
+  </div>
+
+  <script>
+
+  let modoEdicao = false;
+
+  const tbody = document.querySelector('#tabelaMedida tbody');
+
+  function carregarMedida() {
+    fetch('/api/medida')
+      .then(response => response.json())
+      .then(data => {
+        tbody.innerHTML = '';
+        data.forEach(medida => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${medida.idMedida}</td>
+            <td>${medida.descricao}</td>
+            <td>
+                <button class="excluir" onclick="excluirMedida(${medida.idMedida})">X</button>
+                <button onclick="editarMedida(${medida.idMedida})">Editar</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(error => {
+        console.error('Erro ao buscar dados:', error);
+      });
+  }
+
+  function excluirMedida(id) {
+    if (confirm('Tem certeza que deseja excluir esta medida?')) {
+      fetch(`/api/medida/${id}`, {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Erro ao excluir medida');
+        return response.json();
+      })
+      .then(() => {
+        carregarMedida();
+      })
+      .catch(error => console.error('Erro ao excluir:', error));
+    }
+  }
+
+  function editarMedida(id) {
+    modoEdicao = true;
+    fetch(`/api/medida/${id}`)
+      .then(response => response.json())
+      .then(medida => {
+        document.getElementById('idMedida').value = medida.idMedida;
+        document.getElementById('descricao').value = medida.descricao;
+
+        document.getElementById('paginaTabela').classList.add('hidden');
+        document.getElementById('paginaFormulario').classList.remove('hidden');
+      })
+      .catch(error => console.error('Erro ao carregar medida:', error));
+  }
+
+  function mostrarFormulario() {
+    modoEdicao = false;
+    document.getElementById('paginaTabela').classList.add('hidden');
+    document.getElementById('paginaFormulario').classList.remove('hidden');
+  }
+
+  function voltarTabela() {
+    document.getElementById('paginaFormulario').classList.add('hidden');
+    document.getElementById('paginaTabela').classList.remove('hidden');
+  }
+
+  document.getElementById('formMedida').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const idMedida = document.getElementById('idMedida').value;
+    const descricao = document.getElementById('descricao').value;
+
+    const method = modoEdicao ? 'PUT' : 'POST';
+    const url = modoEdicao ? `/api/medida/${idMedida}` : '/api/medida';
+
+    fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idMedida, descricao })
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.text().then(text => {
+          console.error('Erro detalhado da API:', text);
+          throw new Error('Erro ao salvar medida');
+        });
+      }
+      return response.json();
+    })
+    .then(() => {
+      document.getElementById('formMedida').reset();
+      voltarTabela();
+      carregarMedida();
+    })
+    .catch(error => console.error('Erro ao salvar:', error));
+  });
+
+  carregarMedida();
+  </script>
+</body>
+</html>

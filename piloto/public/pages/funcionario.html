@@ -68,7 +68,8 @@
 <!-- Div do Formulário -->
 <div id="paginaFormulario" class="hidden">
   <h1 class="center">Cadastrar Novo Funcionário</h1>
-  <form id="formFuncionario" class="center">
+  <form id="formFuncionario" class="center" enctype="multipart/form-data">
+    <input type="file" id="foto_func" name="foto_func" accept="image/*" /><br><br>
     <input type="number" id="rg" placeholder="RG" required /><br>
     <input type="text" id="nome" placeholder="Nome completo" required /><br>
     <input type="date" id="dt_admissao" placeholder="Data de admissão" required /><br>
@@ -98,9 +99,10 @@
             <td>${f.nome}</td>
              <td>${f.descricao_cargo}</td>
             <td>
+              <button onclick="visualizarFuncionario(${f.idFuncionario})">Visualizar</button>
               <button onclick="excluirFuncionario(${f.idFuncionario})">Excluir</button>
               <button onclick="editarFuncionario(${f.idFuncionario})">Editar</button>
-              </td>
+            </td>
           `;
           tbody.appendChild(row);
         });
@@ -134,7 +136,6 @@ function carregarCargosNoSelect() {
   fetch('/api/cargos')
     .then(res => res.json())
     .then(cargos => {
-      console.log('Cargos carregados:', cargos); 
       const select = document.getElementById('Cargo_idCargo');
       select.innerHTML = '<option value="">Selecione o cargo</option>'; // reset
 
@@ -175,49 +176,100 @@ function carregarCargosNoSelect() {
   }
 }
 
+
+function visualizarFuncionario(id) {
+  fetch(`/api/funcionarios/${id}`)
+    .then(res => res.json())
+    .then(f => {
+
+      function formatarData(dataISO) {
+      if (!dataISO) return '';
+        const [ano, mes, dia] = dataISO.split('T')[0].split('-');
+        return `${dia}/${mes}/${ano}`;
+      }
+      const dataFormatada = formatarData(f.dt_admissao);
+      // Mostrar os dados em texto (sem input)
+      const html = `
+      
+        
+         ${f.fotoBase64 ? `<img src="data:image/jpeg;base64,${f.fotoBase64}" alt="Foto de ${f.nome}" style="width: 300px; height: 300px; border-radius: 50%; object-fit: cover;"/>` : '<p>Sem foto</p>'}
+        <h2>${f.nome}</h2>
+        <p><strong>ID:</strong> ${f.idFuncionario}</p>
+        <p><strong>RG:</strong> ${f.rg}</p>
+        <p><strong>Data de Admissão:</strong> ${dataFormatada}</p>
+        <p><strong>Salário:</strong> R$ ${f.salario}</p>
+        <p><strong>Nome Fantasia:</strong> ${f.nome_fantasia || '-'}</p>
+        <p><strong>Cargo:</strong> ${f.descricao_cargo}</p>
+        <button onclick="fecharVisualizacao()">Fechar</button>
+      `;
+
+      // Criar div modal para visualização (ou use uma div existente)
+      let modal = document.getElementById('modalVisualizacao');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modalVisualizacao';
+        modal.style = `
+          position: fixed; 
+          top: 10%; left: 50%; transform: translateX(-50%);
+          background: #000937; color: white; padding: 20px; border-radius: 8px; 
+          box-shadow: 0 0 10px rgba(0,0,0,0.5);
+          z-index: 1000;
+          width: 1200px;
+          height: 80%;
+          overflow-y: auto;
+          
+        `;
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = html;
+      modal.style.display = 'block';
+    })
+    .catch(err => alert('Erro ao carregar funcionário para visualização: ' + err));
+}
+
+function fecharVisualizacao() {
+  const modal = document.getElementById('modalVisualizacao');
+  if (modal) modal.style.display = 'none';
+}
+
+
   document.getElementById('formFuncionario').addEventListener('submit', function (e) {
   e.preventDefault();
 
   const editingId = this.dataset.editingId;
-  const rg = parseInt(document.getElementById('rg').value);
-  const nome = document.getElementById('nome').value;
-  const dt_admissao = document.getElementById('dt_admissao').value;
-  const salario = parseFloat(document.getElementById('salario').value);
-  const nome_fantasia = document.getElementById('nome_fantasia').value.trim() || null;
-  const foto_func = null;
-  const Cargo_idCargo = parseInt(document.getElementById('Cargo_idCargo').value);
 
-  const dados = {
-    rg,
-    nome,
-    dt_admissao,
-    salario,
-    nome_fantasia,
-    foto_func,
-    Cargo_idCargo
-  };
+  const formData = new FormData();
+  formData.append('rg', document.getElementById('rg').value);
+  formData.append('nome', document.getElementById('nome').value);
+  formData.append('dt_admissao', document.getElementById('dt_admissao').value);
+  formData.append('salario', document.getElementById('salario').value);
+  formData.append('nome_fantasia', document.getElementById('nome_fantasia').value);
+  formData.append('Cargo_idCargo', document.getElementById('Cargo_idCargo').value);
+
+  const fotoInput = document.getElementById('foto_func');
+  if (fotoInput.files.length > 0) {
+    formData.append('foto_func', fotoInput.files[0]);
+  }
 
   const url = editingId ? `/api/funcionarios/${editingId}` : '/api/funcionarios';
   const method = editingId ? 'PUT' : 'POST';
 
   fetch(url, {
     method: method,
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(dados)
+    body: formData // não colocar headers! o navegador define com boundary
   })
-  .then(res => {
-    if (!res.ok) throw new Error('Erro ao salvar funcionário');
-    return res.json();
-  })
-  .then(() => {
-    this.reset();
-    delete this.dataset.editingId;
-    voltarTabela();
-    carregarFuncionarios();
-  })
-  .catch(error => console.error('Erro:', error));
+    .then(res => {
+      if (!res.ok) throw new Error('Erro ao salvar funcionário');
+      return res.json();
+    })
+    .then(() => {
+      this.reset();
+      delete this.dataset.editingId;
+      voltarTabela();
+      carregarFuncionarios();
+    })
+    .catch(error => console.error('Erro:', error));
 });
 
   carregarFuncionarios();

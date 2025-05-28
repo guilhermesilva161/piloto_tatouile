@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Funcionario` (
   `dt_admissao` DATE NOT NULL COMMENT 'Data em que o fucionário foi admitido\nex:\n13/08/2024',
   `salario` DECIMAL(9,2) NOT NULL COMMENT 'Contém o salário do funcionário',
   `nome_fantasia` VARCHAR(45) NULL COMMENT 'Contém um nome fantasia para o funcionário, não obrigatório',
-  `foto_func` BLOB NULL COMMENT 'Atributo que vai armazenar a foto do funcionário',
+  `foto_func` MEDIUMBLOB NULL COMMENT 'Atributo que vai armazenar a foto do funcionário',
   `Cargo_idCargo` INT NOT NULL COMMENT 'chave estrangeira não identificadora - Chave estrangeira do cargo ',
   PRIMARY KEY (`idFuncionario`),
   INDEX `fk_Funcionario_Cargo1_idx` (`Cargo_idCargo` ASC) VISIBLE,
@@ -112,7 +112,7 @@ ENGINE = InnoDB;
 -- Table `AcervoRct`.`Medida`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AcervoRct`.`Medida` (
-  `idMedida` INT NOT NULL COMMENT 'Identificador da medida\n',
+  `idMedida` INT NOT NULL AUTO_INCREMENT COMMENT 'Identificador da medida\n',
   `descricao` VARCHAR(45) NOT NULL COMMENT 'Descrição da medida\n',
   PRIMARY KEY (`idMedida`))
 ENGINE = InnoDB;

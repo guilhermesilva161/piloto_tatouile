@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
     <title>Login</title>
+    <style>
+        body{
+            background:url(../imagens/fundo.png);
+        }
+    </style>
 </head>
 <body>
     <div id="container">
@@ -45,22 +50,24 @@
                 const data = await response.json(); // Parseia a resposta como JSON
 
                 if (response.ok) {
-    const cargo = data.usuario.cargo;
+    
 
     alert(data.mensagem);
+    const cargo = data.usuario.cargo;
 
     switch (cargo) {
+        
         case 8:
             window.location.href = '/pages/home_adm.html';
             break;
-        case 1:
+        case 10:
             window.location.href = '/pages/home_chefe.html';
             break;
         case 'degustador':
             window.location.href = '/pages/home_degustador.html';
             break;
         default:
-            alert('Cargo não reconhecido!');
+            alert('Cargo não reconhecido! Valor recebido: ' + cargo);
     }
 }
             } catch (error) {

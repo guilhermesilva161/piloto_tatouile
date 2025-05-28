@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Tabela de Ingredientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #000937;
+      color: white;
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      width: 60%;
+      margin: auto;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+      color:white;
+    }
+    th {
+      color: #f0f0f0;
+    }
+    .hidden {
+      display: none;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+    }
+    .excluir{
+      color: black;
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Página da Tabela -->
+  <div id="paginaTabela">
+    <h1>Lista de Ingredientes</h1>
+    <button onclick="mostrarFormulario()">Adicionar Ingrediente</button>
+    <table id="tabelaIngrediente">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Página do Formulário -->
+  <div id="paginaFormulario" class="hidden">
+    <h1>Adicionar Novo Ingrediente</h1>
+    <form id="formIngrediente">
+      <input type="hidden" id="idIngrediente" />
+      <br>
+      <input type="text" id="nome" placeholder="Nome do Ingrediente" required />
+      <br>
+      <button type="submit">Salvar</button>
+      <button type="button" onclick="voltarTabela()">Cancelar</button>
+    </form>
+  </div>
+
+  <script>
+
+  let modoEdicao = false;
+
+  const tbody = document.querySelector('#tabelaIngrediente tbody');
+
+  function carregarIngrediente() {
+    fetch('/api/ingrediente')
+      .then(response => response.json())
+      .then(data => {
+        tbody.innerHTML = '';
+        data.forEach(ingrediente => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${ingrediente.idIngrediente}</td>
+            <td>${ingrediente.nome}</td>
+            <td>
+                <button class="excluir" onclick="excluirIngrediente(${ingrediente.idIngrediente})">X</button>
+                <button onclick="editarIngrediente(${ingrediente.idIngrediente})">Editar</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(error => {
+        console.error('Erro ao buscar dados:', error);
+      });
+  }
+
+  function excluirIngrediente(id) {
+    if (confirm('Tem certeza que deseja excluir este ingrediente?')) {
+      fetch(`/api/ingrediente/${id}`, {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Erro ao excluir ingrediente');
+        return response.json();
+      })
+      .then(() => {
+        carregarIngrediente();
+      })
+      .catch(error => console.error('Erro ao excluir:', error));
+    }
+  }
+
+  function editarIngrediente(id) {
+    modoEdicao = true;
+    fetch(`/api/ingrediente/${id}`)
+      .then(response => response.json())
+      .then(ingrediente => {
+        document.getElementById('idIngrediente').value = ingrediente.idIngrediente;
+        document.getElementById('nome').value = ingrediente.nome;
+
+        document.getElementById('paginaTabela').classList.add('hidden');
+        document.getElementById('paginaFormulario').classList.remove('hidden');
+      })
+      .catch(error => console.error('Erro ao carregar ingrediente:', error));
+  }
+
+  function mostrarFormulario() {
+    modoEdicao = false;
+    document.getElementById('paginaTabela').classList.add('hidden');
+    document.getElementById('paginaFormulario').classList.remove('hidden');
+  }
+
+  function voltarTabela() {
+    document.getElementById('paginaFormulario').classList.add('hidden');
+    document.getElementById('paginaTabela').classList.remove('hidden');
+  }
+
+  document.getElementById('formIngrediente').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const idIngrediente = document.getElementById('idIngrediente').value;
+    const nome = document.getElementById('nome').value;
+
+    const method = modoEdicao ? 'PUT' : 'POST';
+    const url = modoEdicao ? `/api/ingrediente/${idIngrediente}` : '/api/ingrediente';
+
+    fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idIngrediente, nome })
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.text().then(text => {
+          console.error('Erro detalhado da API:', text);
+          throw new Error('Erro ao salvar ingrediente');
+        });
+      }
+      return response.json();
+    })
+    .then(() => {
+      document.getElementById('formIngrediente').reset();
+      voltarTabela();
+      carregarIngrediente();
+    })
+    .catch(error => console.error('Erro ao salvar:', error));
+  });
+
+  carregarIngrediente();
+  </script>
+</body>
+</html>

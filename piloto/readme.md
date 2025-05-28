@@ -1,7 +1,8 @@
 ## Tecnologias
-- Node.js
-- MySQL
-- Express
+- Node.js (Para todo o Back-End)
+- MySQL (Biblioteca de MySQLpara Node.js)
+- Express (Server Node.js)
+- Multer (Para lidar com envio de imagens por Node.js)
 
 ## Requisitos
 
@@ -13,17 +14,23 @@ Com o node ja instalado clone o projeto no seu terminal
 
 ```bash
 //Para Clonar o Projeto
-git clone git https://github.com/guilhermesilva161/piloto_tatouille.git
+git clone git https://github.com/guilhermesilva161/piloto_tatouile.git
 
 ```
 
-Após isso baixe as duas bibliotecas com o node
+Após isso baixe as bibliotecas com o node
 
 ```bash
     npm install mysql2
     npm install express
+    npm install multer
 
 ```
+
+
+Crie o Banco de dados com o Script localizado na pasta src/database/script.sql
+
+No proprio script tem os inserts a serem feitos para fazer login
 
 
 ## Execução
@@ -36,4 +43,4 @@ Para rodar o do projeto, use o comando:
     npm start
 ```
 
-Agora so abrir o navegador: [localhost:3000](localhost:3000)
+Agora so abrir o navegador: [localhost:3000](http://localhost:3000)
