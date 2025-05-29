@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Tabela Receitas</title>
+   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #000937;
+      color: white;
+      padding: 0 20px;
+    }
+
+    nav {
+      background-color: #001060;
+      display: flex;
+      padding: 10px;
+      gap: 10px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+
+    nav a {
+      background-color: #0030a0;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    nav a.active {
+      background-color: white;
+      color: #001060;
+      border: 2px solid white;
+    }
+
+    .container {
+      margin-top: 80px;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .search-container input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .search-container img {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #000d4d;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ccc;
+      padding: 12px 15px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #001060;
+      color: white;
+    }
+
+    td {
+      color: white;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 10px 5px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: white;
+      color: black;
+      font-weight: bold;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .add-button {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: white;
+      color: black;
+      font-size: 24px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    form input {
+      width: 80%;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Botão para abrir o formulário -->
+<div class="center">
+  <button  class = "hidden" onclick="mostrarFormulario()">Adicionar Receita</button>
+</div>
+
+
+
+<!-- Div da Tabela -->
+<div id="paginaTabela">
+  <h1 class="center">Lista de Receitas</h1>
+  <table id="tabelaReceita">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Cargo</th>
+        <th>Ações</th> 
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+      <button class="add-button" onclick="mostrarFormulario()">+</button>
+</div>
+
+<!-- Div do Formulário -->
+<div id="paginaFormulario" class="hidden">
+  <h1 class="center">Cadastrar Nova Receita</h1>
+  <form id="formReceita" class="center" enctype="multipart/form-data">
+    <input type="file" id="" name="" accept="image/*" /><br><br>
+    <input type="text" id="nome_rct" placeholder="Nome Receita" required /><br>
+    <input type="date" id="dt_criacao" placeholder="Data de Criação" required /><br>
+    <input type="text" id="preparo" placeholder="Modo de Preparo" required /><br> <br>
+    <select id="FKMedida" required>
+      <option value="">Selecione a medida</option>
+    </select>
+    <br>
+        <select id="FKidIngrediente" required>
+      <option value="">Selecione o Ingrediente/option>
+    </select>
+    <br>
+    <button type="submit">Salvar</button>
+    <button type="button" onclick="voltarTabela()">Cancelar</button>
+  </form>
+
+</div>
+
+<script>
+  function carregarReceitas() {
+    fetch('/api/receita')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector('#tabelaReceita tbody');
+        tbody.innerHTML = '';
+        data.forEach(r => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${r.idReceita}</td>
+            <td>${r.nome_rct}</td>
+             <td>${r.cozinheiro}</td>
+            <td>
+              <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
+              <button onclick="excluirReceita(${r.idReceita})">X</button>
+              <button onclick="editarReceita(${r.idReceita})">Editar</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+  }
+
+
+
+function editarReceita(id) {
+  fetch(`/api/receita/${id}`)
+    .then(res => res.json())
+    .then(r => {
+      document.getElementById('formReceita').dataset.editingId = r.idFuncionario;
+      document.getElementById('nome_rct').value = r.nome_rct;
+      document.getElementById('dt_criacao').value = r.dt_criacao;
+      document.getElementById('preparo').value = r.preparo;
+      
+      carregarMedidasNoSelect(); // para garantir opções atualizadas
+      setTimeout(() => {
+        document.getElementById('FKMedida').value = f.FKMedida;
+      }, 100);
+
+      mostrarFormulario();
+    })
+    .catch(error => console.error('Erro ao carregar funcionário:', error));
+}
+
+function carregarMedidasNoSelect() {
+  fetch('/api/medida')
+    .then(res => res.json())
+    .then(data => {
+      const select = document.getElementById('FKMedida');
+      select.innerHTML = '<option value="">Selecione a Medida </option>'; // reset
+
+      data.forEach(medida => {
+        const option = document.createElement('option');
+        option.value = medida.idMedida;          // o valor enviado no formulário é o id
+        option.textContent = medida.descricao;  // o texto visível é a descrição
+        select.appendChild(option);
+      });
+    })
+    .catch(err => console.error('Erro ao carregar Medidas:', err));
+}
+
+function carregarIngredientesNoSelect() {
+  fetch('/api/ingrediente')
+    .then(res => res.json())
+    .then(data => {
+      const select = document.getElementById('FKidIngrediente');
+      select.innerHTML = '<option value="">Selecione o Ingrediente </option>'; // reset
+
+      data.forEach(i => {
+        const option = document.createElement('option');
+        option.value = i.idIngrediente;          // o valor enviado no formulário é o id
+        option.textContent = i.nome;  // o texto visível é a descrição
+        select.appendChild(option);
+      });
+    })
+    .catch(err => console.error('Erro ao carregar Ingredientes:', err));
+}
+
+
+  function mostrarFormulario() {
+    carregarMedidasNoSelect();
+    carregarIngredientesNoSelect();
+    document.getElementById('paginaTabela').classList.add('hidden');
+    document.getElementById('paginaFormulario').classList.remove('hidden');
+  }
+
+  function voltarTabela() {
+    document.getElementById('paginaFormulario').classList.add('hidden');
+    document.getElementById('paginaTabela').classList.remove('hidden');
+  }
+
+  function excluirReceita(id) {
+  if (confirm('Tem certeza que deseja excluir esta receita?')) {
+    fetch(`/api/funcionarios/${id}`, {
+      method: 'DELETE'
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Erro ao excluir Receita');
+      return res.json();
+    })
+    .then(() => {
+      carregarReceitas(); // atualiza a tabela
+    })
+    .catch(error => console.error('Erro:', error));
+  }
+}
+
+
+function visualizarReceita(id) {
+  fetch(`/api/receita/${id}`)
+    .then(res => res.json())
+    .then(r => {
+
+      function formatarData(dataISO) {
+      if (!dataISO) return '';
+        const [ano, mes, dia] = dataISO.split('T')[0].split('-');
+        return `${dia}/${mes}/${ano}`;
+      }
+      const dataFormatada = formatarData(r.dt_criacao);
+      // Mostrar os dados em texto (sem input)
+      const html = `
+      
+        
+         ${r.fotoBase64 ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome}" style="width: 300px; height: 300px; border-radius: 50%; object-fit: cover;"/>` : '<p>Sem foto</p>'}
+        <h2>${r.nome_rct}</h2>
+        <p><strong>Cozinheiro:</strong> ${r.cozinheiro}</p>
+        <p><strong>Data de Criação:</strong> ${dataFormatada}</p>
+        <p><strong>Modo de preparo:</strong> ${r.preparo}</p>
+        <p><strong>Quantidade Porção:</strong> ${r.quantidade_porcao}</p>
+        <button onclick="fecharVisualizacao()">Fechar</button>
+      `;
+
+      // Criar div modal para visualização (ou use uma div existente)
+      let modal = document.getElementById('modalVisualizacao');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modalVisualizacao';
+        modal.style = `
+          position: fixed; 
+          top: 10%; left: 50%; transform: translateX(-50%);
+          background: #000937; color: white; padding: 20px; border-radius: 8px; 
+          box-shadow: 0 0 10px rgba(0,0,0,0.5);
+          z-index: 1000;
+          width: 1500px;
+          height: 85%;
+          overflow-y: auto;
+          
+        `;
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = html;
+      modal.style.display = 'block';
+    })
+    .catch(err => alert('Erro ao carregar receita para visualização: ' + err));
+}
+
+function fecharVisualizacao() {
+  const modal = document.getElementById('modalVisualizacao');
+  if (modal) modal.style.display = 'none';
+}
+
+
+  document.getElementById('formReceita').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const editingId = this.dataset.editingId;
+
+  const formData = new FormData();
+  formData.append('nome_rct', document.getElementById('nome').value);
+  formData.append('dt_criacao', document.getElementById('dt_criacao').value);
+  formData.append('preparo', document.getElementById('preparo').value);
+
+
+  const fotoInput = document.getElementById('foto_func');
+  if (fotoInput.files.length > 0) {
+    formData.append('foto_func', fotoInput.files[0]);
+  }
+
+  const url = editingId ? `/api/receita/${editingId}` : '/api/receita';
+  const method = editingId ? 'PUT' : 'POST';
+
+  fetch(url, {
+    method: method,
+    body: formData // não colocar headers! o navegador define com boundary
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Erro ao salvar Receita');
+      return res.json();
+    })
+    .then(() => {
+      this.reset();
+      delete this.dataset.editingId;
+      voltarTabela();
+      carregarReceitas();
+    })
+    .catch(error => console.error('Erro:', error));
+});
+
+  carregarReceitas();
+</script>
+
+</body>
+</html>

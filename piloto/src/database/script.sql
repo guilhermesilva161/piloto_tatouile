@@ -121,7 +121,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `AcervoRct`.`Receita contem ingrediente`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AcervoRct`.`Receita contem ingrediente` (
+CREATE TABLE IF NOT EXISTS `AcervoRct`.`receita_contem_ingrediente` (
   `FKnome_rct` VARCHAR(50) NOT NULL COMMENT 'Identificador - Nome da receita',
   `FKcozinheiro` INT NOT NULL COMMENT 'Chave estrangeira identificadora - Identificador do cozinheiro',
   `FKidIngrediente` INT NOT NULL COMMENT 'Chave estrangeira identificadora - Identificador de ingrediente',
