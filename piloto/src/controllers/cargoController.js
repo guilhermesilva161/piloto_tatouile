@@ -70,7 +70,7 @@ exports.deleteCargo = async (req, res) => {
       res.status(200).json({ message: 'Cargo excluído com sucesso' });
     } else {
       res.status(404).json({ message: 'Cargo não encontrado' });
-      alert("Não é possivel excluir um cargo que possui funcionários!");
+
     }
   } catch (error) {
     console.error(error);

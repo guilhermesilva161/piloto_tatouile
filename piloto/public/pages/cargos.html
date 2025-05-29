@@ -3,42 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <title>Tabela de Cargos</title>
-  <style>
+    <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      padding: 30px;
       background-color: #000937;
       color: white;
-      text-align: center;
+      padding: 0 20px;
     }
-    table {
-      border-collapse: collapse;
-      width: 60%;
-      margin: auto;
-    }
-    th, td {
-      border: 1px solid #ccc;
+
+    nav {
+      background-color: #001060;
+      display: flex;
       padding: 10px;
+      gap: 10px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+
+    nav a {
+      background-color: #0030a0;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    nav a.active {
+      background-color: white;
+      color: #001060;
+      border: 2px solid white;
+    }
+
+    .container {
+      margin-top: 80px;
+      padding: 20px;
+    }
+
+    h1 {
       text-align: left;
-      color:white;
+      margin-bottom: 20px;
     }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .search-container input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .search-container img {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #000d4d;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ccc;
+      padding: 12px 15px;
+      text-align: left;
+    }
+
     th {
-      color: #f0f0f0;
+      background-color: #001060;
+      color: white;
     }
+
+    td {
+      color: white;
+    }
+
     .hidden {
       display: none;
     }
+
     input, button {
       padding: 10px;
-      margin: 10px;
+      margin: 10px 5px;
       font-size: 16px;
+      border-radius: 8px;
+      border: none;
     }
+
     button {
       cursor: pointer;
-    }
-    .excluir{
+      background-color: white;
       color: black;
-      background-color: red;
+      font-weight: bold;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .add-button {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: white;
+      color: black;
+      font-size: 24px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    form input {
+      width: 80%;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -47,7 +148,7 @@
   <!-- Página da Tabela -->
   <div id="paginaTabela">
     <h1>Lista de Cargos</h1>
-    <button onclick="mostrarFormulario()">Adicionar Cargo</button>
+    <button class="hidden onclick="mostrarFormulario()">Adicionar Cargo</button>
     <table id="tabelaCargos">
       <thead>
         <tr>
@@ -58,6 +159,7 @@
       </thead>
       <tbody></tbody>
     </table>
+        <button class="add-button" onclick="mostrarFormulario()">+</button>
   </div>
 
   <!-- Página do Formulário -->
@@ -118,7 +220,6 @@
     })
     .then(response => {
       if (!response.ok) throw new Error('Erro ao excluir cargo');
-      alert("Não é possivel excluir um cargo que tem funcionários");
       return response.json();
     })
     .then(() => {
@@ -126,7 +227,7 @@
       
     })
     .catch(error => console.error('Erro ao excluir:', error));
-    alert("Não é possivel excluir um cargo que tem funcionários");
+     alert("Não é possivel excluir um cargo que possui funcionários!");
   }
 }
 

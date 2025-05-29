@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Tabela de Categorias</title>
+  <title>Tabela de Restaurantes</title>
    <style>
     * {
       margin: 0;
@@ -147,13 +147,15 @@
 
   <!-- Página da Tabela -->
   <div id="paginaTabela">
-    <h1>Lista de Categoria</h1>
-    <button class = "hidden" onclick="mostrarFormulario()">Adicionar Categoria</button>
-    <table id="tabelaCategoria">
+    <h1>Lista de Restaurantes</h1>
+    <button class = "hidden" onclick="mostrarFormulario()">Adicionar Restaurante</button>
+    <table id="tabelaRestaurante">
       <thead>
         <tr>
           <th>ID</th>
           <th>Nome</th>
+          <th>Contato</th>
+          <th>Telefone</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -164,12 +166,16 @@
 
   <!-- Página do Formulário -->
   <div id="paginaFormulario" class="hidden">
-    <h1>Adicionar Nova Categoria</h1>
-    <form id="formCategoria">
-      <input type="hidden" id="idCategoria" />
+    <h1>Adicionar Novo restaurante</h1>
+    <form id="formRestaurante">
+      <input type="hidden" id="idRestaurante" />
       <br>
-      <input type="text" id="nome" placeholder="Nome da Categoria" required />
+      <input type="text" id="nome" placeholder="Nome do restaurante" required />
       <br>
+      <input type="text" id="contato" placeholder="Contato do restaurante" required />
+      <br>
+      <input type="text" id="telefone" placeholder="Número do restaurante" required />
+      <br>            
       <button type="submit">Salvar</button>
       <button type="button" onclick="voltarTabela()">Cancelar</button>
     </form>
@@ -180,21 +186,23 @@
   let modoEdicao = false;
 
     
-  const tbody = document.querySelector('#tabelaCategoria tbody');
+  const tbody = document.querySelector('#tabelaRestaurante tbody');
 
-  function carregarCategoria() {
-    fetch('/api/categoria')
+  function carregarRestaurante() {
+    fetch('/api/restaurante')
       .then(response => response.json())
       .then(data => {
         tbody.innerHTML = '';
-        data.forEach(categoria => {
+        data.forEach(restaurante => {
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td>${categoria.idCategoria}</td>
-            <td>${categoria.nome}</td>
+            <td>${restaurante.idRestaurante}</td>
+            <td>${restaurante.nome}</td>
+            <td>${restaurante.contato}</td>
+            <td>${restaurante.telefone}</td>
             <td>
-                <button class="excluir" onclick="excluirCategoria(${categoria.idCategoria})">X</button>
-                <button onclick="editarCategoria(${categoria.idCategoria})">Editar</button>
+                <button class="excluir" onclick="excluirRestaurante(${restaurante.idRestaurante})">X</button>
+                <button onclick="editarRestaurante(${restaurante.idRestaurante})">Editar</button>
             </td>
           `;
           tbody.appendChild(row);
@@ -206,38 +214,40 @@
   }
 
 
-  function excluirCategoria(id) {
-  if (confirm('Tem certeza que deseja excluir esta categoria?')) {
-    fetch(`/api/categoria/${id}`, {
+  function excluirRestaurante(id) {
+  if (confirm('Tem certeza que deseja excluir esta restaurante?')) {
+    fetch(`/api/restaurante/${id}`, {
       method: 'DELETE'
     })
     .then(response => {
-      if (!response.ok) throw new Error('Erro ao excluir categoria');
+      if (!response.ok) throw new Error('Erro ao excluir restaurante');
       return response.json();
     })
     .then(() => {
-      carregarCategoria(); // Atualiza a tabela
+      carregarRestaurante(); // Atualiza a tabela
       
     })
     .catch(error => console.error('Erro ao excluir:', error));
   }
 }
 
-function editarCategoria(id) {
+function editarRestaurante(id) {
   modoEdicao = true; 
   // Encontre o cargo pelo ID
-  fetch(`/api/categoria/${id}`)
+  fetch(`/api/restaurante/${id}`)
     .then(response => response.json())
-    .then(categoria => {
+    .then(restaurante => {
       // Preencher o formulário com os dados do cargo
-      document.getElementById('idCategoria').value = categoria.idCategoria;
-      document.getElementById('nome').value = categoria.nome;
+      document.getElementById('idRestaurante').value = restaurante.idRestaurante;
+      document.getElementById('nome').value = restaurante.nome;
+      document.getElementById('contato').value = restaurante.contato;
+      document.getElementById('telefone').value = restaurante.telefone;
 
       // Mudar para a página de formulário
       document.getElementById('paginaTabela').classList.add('hidden');
       document.getElementById('paginaFormulario').classList.remove('hidden');
     })
-    .catch(error => console.error('Erro ao carregar categoria:', error));
+    .catch(error => console.error('Erro ao carregar restaurante:', error));
 }
 
   function mostrarFormulario() {
@@ -252,40 +262,41 @@ function editarCategoria(id) {
   }
 
 
-document.getElementById('formCategoria').addEventListener('submit', function (e) {
+document.getElementById('formRestaurante').addEventListener('submit', function (e) {
   e.preventDefault();
 
-  const idCategoria = document.getElementById('idCategoria').value;
+  const idRestaurante = document.getElementById('idRestaurante').value;
   const nome = document.getElementById('nome').value;
-
+  const contato = document.getElementById('contato').value;  
+  const telefone = document.getElementById('telefone').value;
 
   const method = modoEdicao ? 'PUT' : 'POST';
-  const url = modoEdicao ? `/api/categoria/${idCategoria}` : '/api/categoria';
+  const url = modoEdicao ? `/api/restaurante/${idRestaurante}` : '/api/restaurante';
 
   fetch(url, {
     method: method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idCategoria, nome })
+    body: JSON.stringify({ idRestaurante, nome, contato, telefone })
   })
 .then(response => {
   if (!response.ok) {
     return response.text().then(text => {
       console.error('Erro detalhado da API:', text);  // <--- log útil
-      throw new Error('Erro ao salvar categoria');
+      throw new Error('Erro ao salvar restaurante');
     });
   }
   return response.json();
 })
   .then(() => {
-    document.getElementById('formCategoria').reset();
+    document.getElementById('formRestaurante').reset();
     voltarTabela();
-    carregarCategoria();
+    carregarRestaurante();
   })
   .catch(error => console.error('Erro ao salvar:', error));
 });
 
 
-  carregarCategoria();
+  carregarRestaurante();
 </script>
 </body>
 </html>

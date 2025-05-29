@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Receita contem ingrediente` (
 -- Table `AcervoRct`.`Restaurante`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AcervoRct`.`Restaurante` (
-  `idRestaurante` SMALLINT NOT NULL COMMENT 'Identificador do restaurante\n',
+  `idRestaurante` SMALLINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador do restaurante\n',
   `nome` VARCHAR(45) NOT NULL COMMENT 'Nome do restaurante',
   `contato` VARCHAR(45) NOT NULL COMMENT 'Contato do restaurante',
   `telefone` CHAR(15) NOT NULL COMMENT 'Telefone de contato do restaurante referência',

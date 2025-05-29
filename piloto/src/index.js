@@ -8,6 +8,7 @@ const funcionarioRoutes = require('./routes/funcionarioRoutes');
 const categoriaRoutes = require('./routes/categoriaRoutes');
 const medidaRoutes = require('./routes/medidaRoutes');
 const ingredienteRoutes = require('./routes/ingredienteRoutes');
+const restauranteRoutes = require('./routes/restauranteRoutes');
 
 const app = express();
 
@@ -37,6 +38,9 @@ app.use('/api/ingrediente', ingredienteRoutes);
 
 // Usando o roteador de medidas
 app.use('/api/medida', medidaRoutes);
+
+// Usando o roteador de medidas
+app.use('/api/restaurante', restauranteRoutes);
 
 
 app.get('/', (req, res) => {
