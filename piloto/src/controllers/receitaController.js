@@ -2,17 +2,18 @@ const pool = require('../database/conexao');
 
 // Função de criar receita
 exports.createReceita = async (req, res) => {
-  const { idReceita, nome, contato, telefone  } = req.body;
+  const { nome_rct, dt_criacao, cozinheiro,preparo, quantidade_porcao, ind_rec_inedita, FKcategoria  } = req.body;
   try {
-    const [result] = await pool.query('INSERT INTO Receita (nome,contato,telefone) VALUES (?,?,?)',
-                                      [nome,contato,telefone]);
-    res.status(201).json({ nome,contato,telefone });
+    const [result] = await pool.query('INSERT INTO Receita (nome_rct, dt_criacao, cozinheiro,preparo, quantidade_porcao, ind_rec_inedita, FKcategoria) VALUES (?,?,?,?,?,?,?)',
+                                      [nome_rct, dt_criacao, cozinheiro, preparo, quantidade_porcao, ind_rec_inedita, FKcategoria]);
+    res.status(201).json({ idReceita: result.insertId ,nome_rct, dt_criacao, cozinheiro,preparo, quantidade_porcao, ind_rec_inedita, FKcategoria });
     console.log("Receita criada com sucesso");
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao criar receita' });
   }
 };
+
 
 // Função de visualizar todas as receitas
 exports.getAllReceita = async (req, res) => {
@@ -73,5 +74,48 @@ exports.deleteReceita = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao excluir receita' });
+  }
+};
+
+
+exports.addIngredientes = async (req, res) => {
+  const { FKnome_rct, FKcozinheiro, FKidIngrediente, FKMedida, quant_ingrediente } = req.body;
+
+  if (!FKnome_rct || !FKcozinheiro || !FKidIngrediente) {
+    return res.status(400).json({ message: 'Faltam dados obrigatórios' });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO receita_contem_ingrediente 
+      (FKnome_rct, FKcozinheiro, FKidIngrediente, FKMedida, quant_ingrediente)
+      VALUES (?, ?, ?, ?, ?)`,
+      [FKnome_rct, FKcozinheiro, FKidIngrediente, FKMedida, quant_ingrediente]
+    );
+
+    res.status(201).json({ message: 'Ingrediente adicionado com sucesso' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao adicionar ingrediente' });
+  }
+};
+
+
+
+exports.uploadFoto = async (req, res) => {
+  try {
+    const { nome_rct, cozinheiro, descricao } = req.body;
+    const fotoBuffer = req.file.buffer;
+
+    await pool.query(
+      `INSERT INTO Foto_Receita (FKnome_rct, FKcozinheiro, foto, descricao)
+       VALUES (?, ?, ?, ?)`,
+      [nome_rct, cozinheiro, fotoBuffer, descricao]
+    );
+
+    res.status(201).json({ message: 'Foto salva com sucesso' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao salvar foto' });
   }
 };

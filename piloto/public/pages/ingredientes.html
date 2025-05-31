@@ -148,7 +148,6 @@
   <!-- Página da Tabela -->
   <div id="paginaTabela">
     <h1>Lista de Ingredientes</h1>
-    <button class="hidden" onclick="mostrarFormulario()">Adicionar Ingrediente</button>
     <table id="tabelaIngrediente">
       <thead>
         <tr>
@@ -236,6 +235,8 @@
 
   function mostrarFormulario() {
     modoEdicao = false;
+    document.getElementById('formIngrediente').reset(); // Limpa todos os campos
+    document.getElementById('idIngrediente').value = ''; 
     document.getElementById('paginaTabela').classList.add('hidden');
     document.getElementById('paginaFormulario').classList.remove('hidden');
   }

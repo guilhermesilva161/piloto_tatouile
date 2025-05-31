@@ -359,4 +359,15 @@ REFERENCES funcionario(idFuncionario)
 ON DELETE CASCADE;
 
 
+
+ALTER TABLE receita_contem_ingrediente
+DROP FOREIGN KEY fk_Receita_has_Ingrediente_Receita1;
+
+ALTER TABLE receita_contem_ingrediente
+ADD CONSTRAINT fk_Receita_has_Ingrediente_Receita1
+FOREIGN KEY (FKnome_rct, FKcozinheiro)
+REFERENCES receita(nome_rct, cozinheiro)
+ON DELETE CASCADE;
+
+
  */

@@ -166,32 +166,65 @@
     </thead>
     <tbody></tbody>
   </table>
-      <button class="add-button" onclick="mostrarFormulario()">+</button>
+      <button class="add-button" onclick="mostrarFormularioCriar()">+</button>
 </div>
 
 <!-- Div do Formulário -->
 <div id="paginaFormulario" class="hidden">
   <h1 class="center">Cadastrar Nova Receita</h1>
   <form id="formReceita" class="center" enctype="multipart/form-data">
-    <input type="file" id="" name="" accept="image/*" /><br><br>
     <input type="text" id="nome_rct" placeholder="Nome Receita" required /><br>
     <input type="date" id="dt_criacao" placeholder="Data de Criação" required /><br>
-    <input type="text" id="preparo" placeholder="Modo de Preparo" required /><br> <br>
-    <select id="FKMedida" required>
-      <option value="">Selecione a medida</option>
+    <input type="text" id="cozinheiro" placeholder="Cozinheiro" required /><br>
+    <input type="number" id="quantidade_porcao" placeholder="Quantidade Porção" required /><br>   
+    <input type="text" id="ind_rec_inedita" placeholder="Receita Inédita (S /N )" required /><br>     
+    <input type="text" id="preparo" placeholder="Modo de Preparo" required /><br><br>
+    <select id="FKcategoria" required>
+      <option value="">Selecione a Categoria</option>
     </select>
     <br>
-        <select id="FKidIngrediente" required>
-      <option value="">Selecione o Ingrediente/option>
-    </select>
     <br>
     <button type="submit">Salvar</button>
     <button type="button" onclick="voltarTabela()">Cancelar</button>
   </form>
 
+
+<!-- Div do Formulário 2 -->
+ <div id="paginaFormulario2" class="hidden">
+  <form id="formReceita2" class="center" enctype="multipart/form-data">
+    <select id="FKidIngrediente" required>
+      <option value="">Selecione o Ingrediente</option>
+    </select>
+    
+    <select id="FKMedida" required>
+      <option value="">Selecione a Medida</option>
+    </select>
+    <input type="number" id="quant_ingrediente" placeholder="Quantidade de Ingredientes" required /><br>   
+    <br>
+    <br>
+    <button type="submit">Salvar</button>
+    <button type="button" onclick="voltarTabela()">Cancelar</button>
+  </form>
+  </div>
+
 </div>
 
 <script>
+
+  function formulario2(){
+
+  carregarMedidasNoSelect();
+  carregarIngredientesNoSelect();
+
+  document.getElementById('paginaTabela').classList.add('hidden');
+  document.getElementById('paginaFormulario2').classList.remove('hidden');
+
+  }
+
+
+
+
+  
   function carregarReceitas() {
     fetch('/api/receita')
       .then(res => res.json())
@@ -228,10 +261,10 @@ function editarReceita(id) {
       
       carregarMedidasNoSelect(); // para garantir opções atualizadas
       setTimeout(() => {
-        document.getElementById('FKMedida').value = f.FKMedida;
+        document.getElementById('FKMedida').value = r.FKMedida;
       }, 100);
 
-      mostrarFormulario();
+      mostrarFormularioEditar();
     })
     .catch(error => console.error('Erro ao carregar funcionário:', error));
 }
@@ -253,6 +286,24 @@ function carregarMedidasNoSelect() {
     .catch(err => console.error('Erro ao carregar Medidas:', err));
 }
 
+function carregarCategoriaNoSelect() {
+  fetch('/api/categoria')
+    .then(res => res.json())
+    .then(data => {
+      const select = document.getElementById('FKcategoria');
+      select.innerHTML = '<option value="">Selecione a Categoria</option>'; //
+
+      data.forEach(categ=> {
+        const option = document.createElement('option');
+        option.value = categ.idCategoria;          // o valor enviado no formulário é o id
+        option.textContent = categ.nome;  // o texto visível é a descrição
+        select.appendChild(option);
+      });
+    })
+    .catch(err => console.error('Erro ao carregar Categoria:', err));
+}
+
+
 function carregarIngredientesNoSelect() {
   fetch('/api/ingrediente')
     .then(res => res.json())
@@ -271,21 +322,37 @@ function carregarIngredientesNoSelect() {
 }
 
 
-  function mostrarFormulario() {
+function mostrarFormularioCriar() {
+  const form = document.getElementById('formReceita');
+  form.reset();
+  delete form.dataset.editingId;
+
+  carregarMedidasNoSelect();
+  carregarIngredientesNoSelect();
+  carregarCategoriaNoSelect();
+
+  document.getElementById('paginaTabela').classList.add('hidden');
+  document.getElementById('paginaFormulario').classList.remove('hidden');
+}
+
+  function mostrarFormularioEditar() {
     carregarMedidasNoSelect();
     carregarIngredientesNoSelect();
+    carregarCategoriaNoSelect();
     document.getElementById('paginaTabela').classList.add('hidden');
     document.getElementById('paginaFormulario').classList.remove('hidden');
   }
 
+
   function voltarTabela() {
     document.getElementById('paginaFormulario').classList.add('hidden');
+    document.getElementById('paginaFormulario2').classList.add('hidden');
     document.getElementById('paginaTabela').classList.remove('hidden');
   }
 
   function excluirReceita(id) {
   if (confirm('Tem certeza que deseja excluir esta receita?')) {
-    fetch(`/api/funcionarios/${id}`, {
+    fetch(`/api/receita/${id}`, {
       method: 'DELETE'
     })
     .then(res => {
@@ -321,6 +388,8 @@ function visualizarReceita(id) {
         <p><strong>Data de Criação:</strong> ${dataFormatada}</p>
         <p><strong>Modo de preparo:</strong> ${r.preparo}</p>
         <p><strong>Quantidade Porção:</strong> ${r.quantidade_porcao}</p>
+        <p><strong>Quantidade Porção:</strong> ${r.FKcategoria}</p>
+
         <button onclick="fecharVisualizacao()">Fechar</button>
       `;
 
@@ -355,40 +424,94 @@ function fecharVisualizacao() {
 }
 
 
+//Submit do Primeiro Formulário
   document.getElementById('formReceita').addEventListener('submit', function (e) {
   e.preventDefault();
 
   const editingId = this.dataset.editingId;
 
-  const formData = new FormData();
-  formData.append('nome_rct', document.getElementById('nome').value);
-  formData.append('dt_criacao', document.getElementById('dt_criacao').value);
-  formData.append('preparo', document.getElementById('preparo').value);
+  const nome_rct = document.getElementById('nome_rct').value;
+  const dt_criacao = document.getElementById('dt_criacao').value;
+  const preparo = document.getElementById('preparo').value;
+  const cozinheiro = document.getElementById('cozinheiro').value;
+  const ind_rec_inedita = document.getElementById('ind_rec_inedita').value;
+  const quantidade_porcao = document.getElementById('quantidade_porcao').value;
+  const FKcategoria = document.getElementById('FKcategoria').value;
 
-
-  const fotoInput = document.getElementById('foto_func');
-  if (fotoInput.files.length > 0) {
-    formData.append('foto_func', fotoInput.files[0]);
+  const dados = {
+    nome_rct,
+    dt_criacao,
+    preparo,
+    cozinheiro,
+    ind_rec_inedita,
+    quantidade_porcao,
+    FKcategoria
   }
+
 
   const url = editingId ? `/api/receita/${editingId}` : '/api/receita';
   const method = editingId ? 'PUT' : 'POST';
 
+
   fetch(url, {
     method: method,
-    body: formData // não colocar headers! o navegador define com boundary
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados) // não colocar headers! o navegador define com boundary
   })
     .then(res => {
-      if (!res.ok) throw new Error('Erro ao salvar Receita');
+      if (!res.ok)
+      throw new Error('Erro ao salvar Receita');
       return res.json();
     })
-    .then(() => {
+    .then((data) => {
+      sessionStorage.setItem('idReceita', data.idReceita);
+      sessionStorage.setItem('nome_rct', data.nome_rct);
+      sessionStorage.setItem('cozinheiro', data.cozinheiro);
+      sessionStorage.setItem('FKcategoria', data.FKcategoria);
+      formulario2();
+    })
+    .catch(error => console.error('Erro:', error));
+});
+
+//Submit do Segundo Formulário
+document.getElementById('formReceita2').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const FKnome_rct = sessionStorage.getItem('nome_rct');
+  const FKcozinheiro = sessionStorage.getItem('cozinheiro');
+  const idReceita = sessionStorage.getItem('idReceita');
+
+  const FKidIngrediente = document.getElementById('FKidIngrediente').value;
+  const FKMedida = document.getElementById('FKMedida').value;
+  const quant_ingrediente = document.getElementById('quant_ingrediente').value;
+
+  console.log('FKnome_rct:', FKnome_rct);
+  console.log('FKcozinheiro:', FKcozinheiro);
+
+  const ingrediente = {
+    FKnome_rct,
+    FKcozinheiro,
+    FKidIngrediente,
+    FKMedida,
+    quant_ingrediente
+  };
+
+  fetch(`/api/receita/${idReceita}/ingrediente`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(ingrediente)
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Erro ao salvar ingrediente da receita');
+      return res.json();
+    })
+    .then(data => {
+      alert('Ingrediente vinculado com sucesso!');
       this.reset();
-      delete this.dataset.editingId;
       voltarTabela();
       carregarReceitas();
     })
-    .catch(error => console.error('Erro:', error));
+    .catch(err => console.error(err));
 });
 
   carregarReceitas();

@@ -46,7 +46,6 @@ app.use('/api/restaurante', restauranteRoutes);
 // Usando o roteador de receitas
 app.use('/api/receita', receitaRoutes);
 
-
 app.get('/', (req, res) => {
   // Envia o index.html da pasta 'public/pages'
   res.sendFile(path.join(__dirname, '../public/pages', 'index.html'));
