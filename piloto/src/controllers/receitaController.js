@@ -29,26 +29,71 @@ exports.getAllReceita = async (req, res) => {
 // Função de buscar receita por ID
 exports.getReceitaById = async (req, res) => {
   const { idReceita } = req.params;
+
   try {
-    const [rows] = await pool.query('SELECT * FROM Receita WHERE idReceita = ?', [idReceita]);
-    if (rows.length > 0) {
-      res.status(200).json(rows[0]);
-    } else {
-      res.status(404).json({ message: 'Receita não encontrada' });
+    // Consulta principal: dados da receita, cozinheiro e categoria
+    const receitaQuery = `
+      SELECT 
+        r.*, 
+        f.nome AS nome_cozinheiro,
+        f.nome_fantasia,
+        cat.nome AS nome_categoria
+      FROM Receita r
+      JOIN Funcionario f ON r.cozinheiro = f.idFuncionario
+      JOIN Categoria cat ON r.FKcategoria = cat.idCategoria
+      WHERE r.idReceita = ?
+    `;
+
+    const [receitaRows] = await pool.query(receitaQuery, [idReceita]);
+
+    if (receitaRows.length === 0) {
+      return res.status(404).json({ message: 'Receita não encontrada' });
     }
+
+    const receita = receitaRows[0];
+
+    // Converte a imagem, se existir
+    if (receita.foto_func) {
+      receita.fotoBase64 = receita.foto_func.toString('base64');
+      delete receita.foto_func;
+    }
+
+    // Consulta dos ingredientes relacionados
+    const ingredientesQuery = `
+      SELECT 
+        i.nome AS nome_ingrediente,
+        rci.quant_ingrediente,
+        m.descricao AS nome_medida
+      FROM receita_contem_ingrediente rci
+      JOIN Ingrediente i ON rci.FKidIngrediente = i.idIngrediente
+      JOIN Medida m ON rci.FKMedida = m.idMedida
+      WHERE rci.FKnome_rct = ? AND rci.FKcozinheiro = ?
+    `;
+
+    const [ingredientesRows] = await pool.query(ingredientesQuery, [
+      receita.nome_rct,
+      receita.cozinheiro
+    ]);
+
+    receita.ingredientes = ingredientesRows;
+
+    res.status(200).json(receita);
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erro ao buscar a receita' });
+    res.status(500).json({ message: 'Erro ao buscar a receita', error: error.message });
   }
 };
-
 // Função de atualizar uma receita por ID
 exports.updateReceita = async (req, res) => {
   const { idReceita } = req.params;
-  const { nome,contato,telefone } = req.body;
+  const { nome_rct, dt_criacao, preparo,cozinheiro,ind_rec_inedita,quantidade_porcao,FKcategoria} = req.body;
+    if (!idReceita || isNaN(Number(idReceita))) {
+    return res.status(400).json({ message: 'ID da receita inválido ou ausente.' });
+  }
   try {
-    const [result] = await pool.query('UPDATE Receita SET nome = ?, contato = ?, telefone = ? WHERE idReceita = ?',
-                                      [nome,contato,telefone, idReceita]);
+    const [result] = await pool.query('UPDATE Receita SET nome_rct = ?, dt_criacao = ?, preparo = ?,cozinheiro = ?, ind_rec_inedita = ?, quantidade_porcao = ?, FKcategoria = ? WHERE idReceita = ?',
+                                      [ nome_rct, dt_criacao, preparo,cozinheiro,ind_rec_inedita,quantidade_porcao,FKcategoria, idReceita]);
     if (result.affectedRows > 0) {
       res.status(200).json({ message: 'Receita atualizada com sucesso' });
       console.log("Receita atualizada com sucesso");

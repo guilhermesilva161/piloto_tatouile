@@ -254,11 +254,15 @@ function editarReceita(id) {
   fetch(`/api/receita/${id}`)
     .then(res => res.json())
     .then(r => {
-      document.getElementById('formReceita').dataset.editingId = r.idFuncionario;
+      document.getElementById('formReceita').dataset.editingId = r.idReceita;
       document.getElementById('nome_rct').value = r.nome_rct;
       document.getElementById('dt_criacao').value = r.dt_criacao;
       document.getElementById('preparo').value = r.preparo;
-      
+      document.getElementById('FKcategoria').value = r.FKcategoria;
+
+      sessionStorage.setItem('idReceita', r.idReceita);
+      sessionStorage.setItem('nome_rct', r.nome_rct);
+      sessionStorage.setItem('cozinheiro', r.cozinheiro);
       carregarMedidasNoSelect(); // para garantir opções atualizadas
       setTimeout(() => {
         document.getElementById('FKMedida').value = r.FKMedida;
@@ -266,7 +270,7 @@ function editarReceita(id) {
 
       mostrarFormularioEditar();
     })
-    .catch(error => console.error('Erro ao carregar funcionário:', error));
+    .catch(error => console.error('Erro ao carregar Receita:', error));
 }
 
 function carregarMedidasNoSelect() {
@@ -371,24 +375,33 @@ function visualizarReceita(id) {
   fetch(`/api/receita/${id}`)
     .then(res => res.json())
     .then(r => {
-
+      document.getElementById('paginaTabela').classList.add('hidden');
       function formatarData(dataISO) {
       if (!dataISO) return '';
         const [ano, mes, dia] = dataISO.split('T')[0].split('-');
         return `${dia}/${mes}/${ano}`;
       }
       const dataFormatada = formatarData(r.dt_criacao);
+
+      
       // Mostrar os dados em texto (sem input)
       const html = `
       
         
          ${r.fotoBase64 ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome}" style="width: 300px; height: 300px; border-radius: 50%; object-fit: cover;"/>` : '<p>Sem foto</p>'}
         <h2>${r.nome_rct}</h2>
-        <p><strong>Cozinheiro:</strong> ${r.cozinheiro}</p>
-        <p><strong>Data de Criação:</strong> ${dataFormatada}</p>
-        <p><strong>Modo de preparo:</strong> ${r.preparo}</p>
-        <p><strong>Quantidade Porção:</strong> ${r.quantidade_porcao}</p>
-        <p><strong>Quantidade Porção:</strong> ${r.FKcategoria}</p>
+        <p><strong>Cozinheiro:</strong> ${r.nome_cozinheiro}</p> <br>
+        <p><strong>Categoria:</strong> ${r.nome_categoria}</p><br>
+        <p><strong>Data de Criação:</strong> ${dataFormatada}</p><br>
+        <p><strong>Quantidade Porção:</strong> ${r.quantidade_porcao}</p><br>
+        <p><strong>Ingredientes:</strong></p><br>
+          <ul>
+           ${r.ingredientes && r.ingredientes.length > 0
+            ? r.ingredientes.map(ing => `<li>${ing.nome_ingrediente} — ${ing.quant_ingrediente} ${ing.nome_medida}</li>`).join('')
+            : '<li>Sem ingredientes cadastrados</li>'}
+          </ul><br><br>
+        <p><strong>Modo de preparo:</strong> ${r.preparo}</p><br>
+
 
         <button onclick="fecharVisualizacao()">Fechar</button>
       `;
@@ -421,6 +434,7 @@ function visualizarReceita(id) {
 function fecharVisualizacao() {
   const modal = document.getElementById('modalVisualizacao');
   if (modal) modal.style.display = 'none';
+    document.getElementById('paginaTabela').classList.remove('hidden');
 }
 
 
@@ -441,8 +455,8 @@ function fecharVisualizacao() {
   const dados = {
     nome_rct,
     dt_criacao,
-    preparo,
     cozinheiro,
+    preparo,
     ind_rec_inedita,
     quantidade_porcao,
     FKcategoria
@@ -468,6 +482,7 @@ function fecharVisualizacao() {
       sessionStorage.setItem('nome_rct', data.nome_rct);
       sessionStorage.setItem('cozinheiro', data.cozinheiro);
       sessionStorage.setItem('FKcategoria', data.FKcategoria);
+      document.getElementById('formReceita2').dataset.editingId = data.idReceita;
       formulario2();
     })
     .catch(error => console.error('Erro:', error));
@@ -476,7 +491,7 @@ function fecharVisualizacao() {
 //Submit do Segundo Formulário
 document.getElementById('formReceita2').addEventListener('submit', function (e) {
   e.preventDefault();
-
+  const editingId = this.dataset.editingId || sessionStorage.getItem('idReceita');
   const FKnome_rct = sessionStorage.getItem('nome_rct');
   const FKcozinheiro = sessionStorage.getItem('cozinheiro');
   const idReceita = sessionStorage.getItem('idReceita');
@@ -496,8 +511,11 @@ document.getElementById('formReceita2').addEventListener('submit', function (e) 
     quant_ingrediente
   };
 
-  fetch(`/api/receita/${idReceita}/ingrediente`, {
-    method: 'POST',
+  const url = editingId ? `/api/receita/${editingId}/ingrediente` : '/api/receita';
+  const method = editingId ? 'PUT' : 'POST';
+
+  fetch(url, {
+    method: method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(ingrediente)
   })

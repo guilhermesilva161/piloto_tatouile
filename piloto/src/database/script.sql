@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Funcionario` (
     FOREIGN KEY (`Cargo_idCargo`)
     REFERENCES `AcervoRct`.`Cargo` (`idCargo`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -88,12 +88,12 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Receita` (
     FOREIGN KEY (`cozinheiro`)
     REFERENCES `AcervoRct`.`Funcionario` (`idFuncionario`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_Receita_Categoria`
     FOREIGN KEY (`FKcategoria`)
     REFERENCES `AcervoRct`.`Categoria` (`idCategoria`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION
+    ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
 
@@ -135,17 +135,17 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`receita_contem_ingrediente` (
     FOREIGN KEY (`FKnome_rct`, `FKcozinheiro`)
     REFERENCES `AcervoRct`.`Receita` (`nome_rct`, `cozinheiro`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_Receita_has_Ingrediente_Ingrediente1`
     FOREIGN KEY (`FKidIngrediente`)
     REFERENCES `AcervoRct`.`Ingrediente` (`idIngrediente`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_Receita_has_Ingrediente_Medida1`
     FOREIGN KEY (`FKMedida`)
     REFERENCES `AcervoRct`.`Medida` (`idMedida`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION
+    ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
 
@@ -177,12 +177,12 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Referencia` (
     FOREIGN KEY (`FKfuncionario`)
     REFERENCES `AcervoRct`.`Funcionario` (`idFuncionario`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_Funcionario_has_Restaurante_Restaurante1`
     FOREIGN KEY (`FKRestaurante`)
     REFERENCES `AcervoRct`.`Restaurante` (`idRestaurante`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -214,12 +214,12 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Degustacao` (
     FOREIGN KEY (`FKnome_rct` , `FKcozinheiro`)
     REFERENCES `AcervoRct`.`Receita` (`nome_rct` , `cozinheiro`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_Degustacao_Funcionario1`
     FOREIGN KEY (`FKdegustador`)
     REFERENCES `AcervoRct`.`Funcionario` (`idFuncionario`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Foto_Receita` (
     FOREIGN KEY (`FKnome_rct` , `FKcozinheiro`)
     REFERENCES `AcervoRct`.`Receita` (`nome_rct` , `cozinheiro`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Livro` (
     FOREIGN KEY (`FKeditor`)
     REFERENCES `AcervoRct`.`Funcionario` (`idFuncionario`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -275,12 +275,12 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Publicacao` (
     FOREIGN KEY (`FKLivro`)
     REFERENCES `AcervoRct`.`Livro` (`idLivro`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_Livro_has_Receita_Receita1`
     FOREIGN KEY (`FKnome_rct` , `FKcozinheiro`)
     REFERENCES `AcervoRct`.`Receita` (`nome_rct` , `cozinheiro`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -297,8 +297,8 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Usuarios` (
   CONSTRAINT `fk_Usuarios_Funcionario1`
     FOREIGN KEY (`FKfuncionario`)
     REFERENCES `AcervoRct`.`Funcionario` (`idFuncionario`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
