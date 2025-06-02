@@ -483,7 +483,7 @@ function fecharVisualizacao() {
       sessionStorage.setItem('cozinheiro', data.cozinheiro);
       sessionStorage.setItem('FKcategoria', data.FKcategoria);
       document.getElementById('formReceita2').dataset.editingId = data.idReceita;
-      formulario2();
+      formulario2(editingId);
     })
     .catch(error => console.error('Erro:', error));
 });
@@ -502,6 +502,7 @@ document.getElementById('formReceita2').addEventListener('submit', function (e) 
 
   console.log('FKnome_rct:', FKnome_rct);
   console.log('FKcozinheiro:', FKcozinheiro);
+  console.log('FKcozinheiro:', editingId);
 
   const ingrediente = {
     FKnome_rct,
@@ -512,7 +513,7 @@ document.getElementById('formReceita2').addEventListener('submit', function (e) 
   };
 
   const url = editingId ? `/api/receita/${editingId}/ingrediente` : '/api/receita';
-  const method = editingId ? 'PUT' : 'POST';
+  const method = editingId ? 'POST' : 'POST';
 
   fetch(url, {
     method: method,

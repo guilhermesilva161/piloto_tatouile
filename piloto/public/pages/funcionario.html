@@ -53,26 +53,29 @@
       text-align: left;
       margin-bottom: 20px;
     }
-
     .search-container {
-      display: flex;
-      align-items: center;
+      position: relative;
+      width: 300px; /* tamanho menor */
       margin-bottom: 20px;
-      gap: 10px;
     }
 
     .search-container input {
-      flex: 1;
-      padding: 10px;
+      width: 100%;
+      padding: 10px 40px 10px 15px; /* espaço para a lupa no lado direito */
       border-radius: 8px;
       border: none;
       font-size: 16px;
     }
 
-    .search-container img {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
+    .search-container .icon-lupa {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+      fill: #888;
     }
 
     table {
@@ -154,7 +157,29 @@
 
 <!-- Div da Tabela -->
 <div id="paginaTabela">
-  <h1 class="center">Lista de Funcionários</h1>
+    <h1 class="center">Lista de Funcionários</h1>
+
+    <!-- Campo de pesquisa -->
+    <div class="search-container">
+      <input
+        type="text"
+        id="inputPesquisa"
+        placeholder="Pesquisar por nome ou cargo"
+        oninput="filtrarTabela()"
+      />
+      <svg
+        class="icon-lupa"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"
+        />
+      </svg>
+    </div>
+
   <table id="tabelaFuncionario">
     <thead>
       <tr>
@@ -191,28 +216,29 @@
 </div>
 
 <script>
-  function carregarFuncionarios() {
-    fetch('/api/funcionarios')
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.querySelector('#tabelaFuncionario tbody');
-        tbody.innerHTML = '';
-        data.forEach(f => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${f.idFuncionario}</td>
-            <td>${f.nome}</td>
-             <td>${f.descricao_cargo}</td>
-            <td>
-              <button onclick="visualizarFuncionario(${f.idFuncionario})">Visualizar</button>
-              <button onclick="excluirFuncionario(${f.idFuncionario})">X</button>
-              <button onclick="editarFuncionario(${f.idFuncionario})">Editar</button>
-            </td>
-          `;
-          tbody.appendChild(row);
+    function carregarFuncionarios() {
+      fetch("/api/funcionarios")
+        .then((res) => res.json())
+        .then((data) => {
+          const tbody = document.querySelector("#tabelaFuncionario tbody");
+          tbody.innerHTML = "";
+          data.forEach((f) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${f.idFuncionario}</td>
+              <td>${f.nome}</td>
+              <td>${f.descricao_cargo}</td>
+              <td>
+                <button onclick="visualizarFuncionario(${f.idFuncionario})">Visualizar</button>
+                <button onclick="excluirFuncionario(${f.idFuncionario})">X</button>
+                <button onclick="editarFuncionario(${f.idFuncionario})">Editar</button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+          filtrarTabela(); // Aplica filtro caso tenha texto digitado
         });
-      });
-  }
+    }
 
 
 
@@ -253,6 +279,21 @@ function carregarCargosNoSelect() {
     })
     .catch(err => console.error('Erro ao carregar cargos:', err));
 }
+
+    function filtrarTabela() {
+      const filtro = document.getElementById("inputPesquisa").value.toLowerCase();
+      const linhas = document.querySelectorAll("#tabelaFuncionario tbody tr");
+
+      linhas.forEach((linha) => {
+        const nome = linha.cells[1].textContent.toLowerCase();
+        const cargo = linha.cells[2].textContent.toLowerCase();
+        if (nome.includes(filtro) || cargo.includes(filtro)) {
+          linha.style.display = "";
+        } else {
+          linha.style.display = "none";
+        }
+      });
+    }
 
   function mostrarFormulario() {
     carregarCargosNoSelect();

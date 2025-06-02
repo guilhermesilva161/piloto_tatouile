@@ -55,24 +55,28 @@
     }
 
     .search-container {
-      display: flex;
-      align-items: center;
+      position: relative;
+      width: 300px; /* tamanho menor */
       margin-bottom: 20px;
-      gap: 10px;
     }
 
     .search-container input {
-      flex: 1;
-      padding: 10px;
+      width: 100%;
+      padding: 10px 40px 10px 15px; /* espaço para a lupa no lado direito */
       border-radius: 8px;
       border: none;
       font-size: 16px;
     }
 
-    .search-container img {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
+    .search-container .icon-lupa {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+      fill: #888;
     }
 
     table {
@@ -148,12 +152,33 @@
   <!-- Página da Tabela -->
   <div id="paginaTabela">
     <h1>Lista de Cargos</h1>
+
+    <!-- Campo de pesquisa -->
+    <div class="search-container">
+      <input
+        type="text"
+        id="inputPesquisa"
+        placeholder="Pesquisar por Descrição ou Status"
+      />
+      <svg
+        class="icon-lupa"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"
+        />
+      </svg>
+    </div>
     <button class="hidden onclick="mostrarFormulario()">Adicionar Cargo</button>
     <table id="tabelaCargos">
       <thead>
         <tr>
           <th>ID</th>
           <th>Descrição</th>
+          <th>Status</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -188,29 +213,54 @@
 
     
   const tbody = document.querySelector('#tabelaCargos tbody');
+  let cargosData = [];  
 
-  function carregarCargos() {
-    fetch('/api/cargos')
-      .then(response => response.json())
-      .then(data => {
-        tbody.innerHTML = '';
-        data.forEach(cargo => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${cargo.idCargo}</td>
-            <td>${cargo.descricao}</td>
-            <td>
-                <button class="excluir" onclick="excluirCargo(${cargo.idCargo})">X</button>
-                <button onclick="editarCargo(${cargo.idCargo})">Editar</button>
-            </td>
-          `;
-          tbody.appendChild(row);
+    function carregarCargos() {
+      fetch('/api/cargos')
+        .then(response => response.json())
+        .then(data => {
+          cargosData = data; // guarda os dados para filtro
+          exibirTabela(data);
+        })
+        .catch(error => {
+          console.error('Erro ao buscar dados:', error);
         });
-      })
-      .catch(error => {
-        console.error('Erro ao buscar dados:', error);
+    }
+    function exibirTabela(data) {
+      tbody.innerHTML = '';
+      data.forEach(cargo => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${cargo.idCargo}</td>
+          <td>${cargo.descricao}</td>
+          <td>${cargo.ind_ativo || ''}</td> <!-- Exibe status -->
+          <td>
+            <button class="excluir" onclick="excluirCargo(${cargo.idCargo})">X</button>
+            <button onclick="editarCargo(${cargo.idCargo})">Editar</button>
+          </td>
+        `;
+        tbody.appendChild(row);
       });
-  }
+    }
+
+      document.getElementById('inputPesquisa').addEventListener('input', function() {
+  const termo = this.value.toLowerCase().trim();
+
+  const filtrados = cargosData.filter(cargo => {
+    const descricao = cargo.descricao.toLowerCase();
+    const status = (cargo.ind_ativo || '').toLowerCase();
+
+    // Se o termo for "ativo" ou "inativo", só faz filtro exato no status
+    if (termo === 'ativo' || termo === 'inativo') {
+      return status === termo;
+    }
+    
+    // Se não, faz filtro tradicional por substring na descrição e status
+    return descricao.includes(termo) || status.includes(termo);
+  });
+
+  exibirTabela(filtrados);
+});
 
 
   function excluirCargo(id) {
