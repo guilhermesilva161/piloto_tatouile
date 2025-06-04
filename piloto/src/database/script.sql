@@ -80,10 +80,10 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Receita` (
   `quantidade_porcao` DECIMAL(3,1) NOT NULL COMMENT 'Quantidade de porções obtidas nesta receita',
   `ind_rec_inedita` CHAR(1) NOT NULL COMMENT 'Indicador de receita inédita',
   `FKcategoria` INT NOT NULL COMMENT 'Chave estrangeira da categoria da receita',
-  PRIMARY KEY (`nome_rct`, `cozinheiro`),
-  UNIQUE INDEX `idReceita_UNIQUE` (`idReceita` ASC),
+  PRIMARY KEY (`idReceita`),
   INDEX `fk_Receita_Funcionario_idx` (`cozinheiro` ASC),
   INDEX `fk_Receita_Categoria_idx` (`FKcategoria` ASC),
+  UNIQUE INDEX `unq_nome_cozinheiro` (`nome_rct`, `cozinheiro`),
   CONSTRAINT `fk_Receita_Funcionario`
     FOREIGN KEY (`cozinheiro`)
     REFERENCES `AcervoRct`.`Funcionario` (`idFuncionario`)
@@ -122,32 +122,33 @@ ENGINE = InnoDB;
 -- Table `AcervoRct`.`Receita contem ingrediente`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AcervoRct`.`receita_contem_ingrediente` (
-  `FKnome_rct` VARCHAR(50) NOT NULL COMMENT 'Identificador - Nome da receita',
-  `FKcozinheiro` INT NOT NULL COMMENT 'Chave estrangeira identificadora - Identificador do cozinheiro',
-  `FKidIngrediente` INT NOT NULL COMMENT 'Chave estrangeira identificadora - Identificador de ingrediente',
-  `FKMedida` INT NOT NULL COMMENT 'Chave estrangeira não identificadora - Identificador da medida',
+  `FKidReceita` INT NOT NULL COMMENT 'Chave estrangeira identificadora - ID da receita',
+  `FKidIngrediente` INT NOT NULL COMMENT 'Chave estrangeira identificadora - ID do ingrediente',
+  `FKMedida` INT NOT NULL COMMENT 'Chave estrangeira não identificadora - ID da medida',
   `quant_ingrediente` DECIMAL(5,1) NOT NULL COMMENT 'Quantidade de ingredientes usados',
-  PRIMARY KEY (`FKnome_rct`, `FKcozinheiro`, `FKidIngrediente`),
-  INDEX `fk_Receita_has_Ingrediente_Ingrediente1_idx` (`FKidIngrediente` ASC),
-  INDEX `fk_Receita_has_Ingrediente_Receita1_idx` (`FKnome_rct` ASC, `FKcozinheiro` ASC),
-  INDEX `fk_Receita_has_Ingrediente_Medida1_idx` (`FKMedida` ASC),
-  CONSTRAINT `fk_Receita_has_Ingrediente_Receita1`
-    FOREIGN KEY (`FKnome_rct`, `FKcozinheiro`)
-    REFERENCES `AcervoRct`.`Receita` (`nome_rct`, `cozinheiro`)
-    ON DELETE NO ACTION
+  PRIMARY KEY (`FKidReceita`, `FKidIngrediente`),
+  INDEX `fk_receita_idx` (`FKidReceita` ASC),
+  INDEX `fk_ingrediente_idx` (`FKidIngrediente` ASC),
+  INDEX `fk_medida_idx` (`FKMedida` ASC),
+  
+  CONSTRAINT `fk_receita_contem_ingrediente_receita`
+    FOREIGN KEY (`FKidReceita`)
+    REFERENCES `AcervoRct`.`Receita` (`idReceita`)
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT `fk_Receita_has_Ingrediente_Ingrediente1`
+
+  CONSTRAINT `fk_receita_contem_ingrediente_ingrediente`
     FOREIGN KEY (`FKidIngrediente`)
     REFERENCES `AcervoRct`.`Ingrediente` (`idIngrediente`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE,
-  CONSTRAINT `fk_Receita_has_Ingrediente_Medida1`
+
+  CONSTRAINT `fk_receita_contem_ingrediente_medida`
     FOREIGN KEY (`FKMedida`)
     REFERENCES `AcervoRct`.`Medida` (`idMedida`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
-
 
 
 -- -----------------------------------------------------

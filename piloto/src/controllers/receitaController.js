@@ -35,7 +35,8 @@ exports.getReceitaById = async (req, res) => {
     const receitaQuery = `
       SELECT 
         r.*, 
-        f.nome AS nome_cozinheiro,
+        f.nome AS cozinheiro,
+        f.idFuncionario AS FKcozinheiro,
         f.nome_fantasia,
         cat.nome AS nome_categoria
       FROM Receita r
@@ -52,7 +53,7 @@ exports.getReceitaById = async (req, res) => {
 
     const receita = receitaRows[0];
 
-    // Converte a imagem, se existir
+    // Converte a imagem, se existir (ajuste o campo conforme seu banco)
     if (receita.foto_func) {
       receita.fotoBase64 = receita.foto_func.toString('base64');
       delete receita.foto_func;
@@ -67,13 +68,10 @@ exports.getReceitaById = async (req, res) => {
       FROM receita_contem_ingrediente rci
       JOIN Ingrediente i ON rci.FKidIngrediente = i.idIngrediente
       JOIN Medida m ON rci.FKMedida = m.idMedida
-      WHERE rci.FKnome_rct = ? AND rci.FKcozinheiro = ?
+      WHERE rci.FKidReceita = ?
     `;
 
-    const [ingredientesRows] = await pool.query(ingredientesQuery, [
-      receita.nome_rct,
-      receita.cozinheiro
-    ]);
+    const [ingredientesRows] = await pool.query(ingredientesQuery, [idReceita]);
 
     receita.ingredientes = ingredientesRows;
 
@@ -84,6 +82,7 @@ exports.getReceitaById = async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar a receita', error: error.message });
   }
 };
+
 // Função de atualizar uma receita por ID
 exports.updateReceita = async (req, res) => {
   const { idReceita } = req.params;
@@ -94,6 +93,26 @@ exports.updateReceita = async (req, res) => {
   try {
     const [result] = await pool.query('UPDATE Receita SET nome_rct = ?, dt_criacao = ?, preparo = ?,cozinheiro = ?, ind_rec_inedita = ?, quantidade_porcao = ?, FKcategoria = ? WHERE idReceita = ?',
                                       [ nome_rct, dt_criacao, preparo,cozinheiro,ind_rec_inedita,quantidade_porcao,FKcategoria, idReceita]);
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: 'Receita atualizada com sucesso' });
+      console.log("Receita atualizada com sucesso");
+    } else {
+      res.status(404).json({ message: 'Receita não encontrada' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao atualizar receita' });
+  }
+};
+exports.updateIngrediente = async (req, res) => {
+  const { FKidReceita } = req.params;
+  const { FKidIngrediente,FKMedida,quant_ingrediente} = req.body;
+    if (!FKidReceita || isNaN(Number(FKidReceita))) {
+    return res.status(400).json({ message: 'ID da receita inválido ou ausente.' });
+  }
+  try {
+    const [result] = await pool.query('UPDATE Receita SET FKidIngrediente, FKMedida = ?, quantidade_ingrediente = ?, FKcategoria = ? WHERE FKidReceita = ?',
+                                      [ FKidIngrediente,FKMedida,quant_ingrediente, FKidReceita]);
     if (result.affectedRows > 0) {
       res.status(200).json({ message: 'Receita atualizada com sucesso' });
       console.log("Receita atualizada com sucesso");
@@ -124,18 +143,19 @@ exports.deleteReceita = async (req, res) => {
 
 
 exports.addIngredientes = async (req, res) => {
-  const { FKnome_rct, FKcozinheiro, FKidIngrediente, FKMedida, quant_ingrediente } = req.body;
+  const { idReceita } = req.params;
+  const { FKidIngrediente, FKMedida, quant_ingrediente } = req.body;
 
-  if (!FKnome_rct || !FKcozinheiro || !FKidIngrediente) {
+  if (!idReceita || !FKidIngrediente) {
     return res.status(400).json({ message: 'Faltam dados obrigatórios' });
   }
 
   try {
     await pool.query(
       `INSERT INTO receita_contem_ingrediente 
-      (FKnome_rct, FKcozinheiro, FKidIngrediente, FKMedida, quant_ingrediente)
-      VALUES (?, ?, ?, ?, ?)`,
-      [FKnome_rct, FKcozinheiro, FKidIngrediente, FKMedida, quant_ingrediente]
+      (FKidReceita, FKidIngrediente, FKMedida, quant_ingrediente)
+      VALUES (?, ?, ?, ?)`,
+      [idReceita, FKidIngrediente, FKMedida, quant_ingrediente]
     );
 
     res.status(201).json({ message: 'Ingrediente adicionado com sucesso' });

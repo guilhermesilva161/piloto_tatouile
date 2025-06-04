@@ -215,7 +215,6 @@
     </thead>
     <tbody></tbody>
   </table>
-      <button class="add-button" onclick="mostrarFormularioCriar()">+</button>
 </div>
 
 <!-- Div do Formulário -->
@@ -287,8 +286,6 @@ function formulario2(idReceita){
              <td>${r.cozinheiro}</td>
             <td>
               <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
-              <button onclick="excluirReceita(${r.idReceita})">X</button>
-              <button onclick="editarReceita(${r.idReceita})">Editar</button>
             </td>
           `;
           tbody.appendChild(row);
