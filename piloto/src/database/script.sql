@@ -228,18 +228,18 @@ ENGINE = InnoDB;
 -- Table `AcervoRct`.`Foto_Receita`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AcervoRct`.`Foto_Receita` (
-  `idFoto_Receita` INT NOT NULL AUTO_INCREMENT COMMENT 'Contém o identificador da foto da receita.\n\nEx;\nidFoto\n 00001',
-  `FKnome_rct` VARCHAR(50) NOT NULL COMMENT 'Chave estrangeira do nome da receita',
-  `FKcozinheiro` INT NOT NULL COMMENT 'Chave estrangeira do cozinheiro',
-  `foto` BLOB NOT NULL COMMENT 'Foto da receita',
-  `descricao` VARCHAR(45) NOT NULL COMMENT 'Título da receita',
+  `idFoto_Receita` INT NOT NULL AUTO_INCREMENT COMMENT 'Contém o identificador da foto da receita.\n\nEx:\nidFoto = 00001',
+  `FKidReceita` INT NOT NULL COMMENT 'Chave estrangeira que referencia a receita pelo seu identificador único (idReceita)',
+  `foto` MEDIUMBLOB NOT NULL COMMENT 'Foto da receita em formato binário (BLOB)',
+  `descricao` VARCHAR(100) NOT NULL COMMENT 'Descrição ou título da foto da receita',
   PRIMARY KEY (`idFoto_Receita`),
-  INDEX `fk_Foto_Receita_Receita1_idx` (`FKnome_rct` ASC, `FKcozinheiro` ASC) VISIBLE,
-  CONSTRAINT `fk_Foto_Receita_Receita1`
-    FOREIGN KEY (`FKnome_rct` , `FKcozinheiro`)
-    REFERENCES `AcervoRct`.`Receita` (`nome_rct` , `cozinheiro`)
-    ON DELETE NO ACTION
-    ON UPDATE CASCADE)
+  INDEX `fk_Foto_Receita_Receita_idx` (`FKidReceita` ASC) VISIBLE,
+  CONSTRAINT `fk_Foto_Receita_Receita`
+    FOREIGN KEY (`FKidReceita`)
+    REFERENCES `AcervoRct`.`Receita` (`idReceita`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)
 ENGINE = InnoDB;
 
 

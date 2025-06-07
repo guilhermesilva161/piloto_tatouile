@@ -18,7 +18,7 @@ exports.createReceita = async (req, res) => {
 // Função de visualizar todas as receitas
 exports.getAllReceita = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM Receita');
+    const [rows] = await pool.query('SELECT r.*, f.nome AS cozinheiro,f.idFuncionario AS FKcozinheiro,f.nome_fantasia,cat.nome AS nome_categoria,TO_BASE64(fr.foto) AS fotoBase64 FROM Receita r JOIN Funcionario f ON r.cozinheiro = f.idFuncionario JOIN Categoria cat ON r.FKcategoria = cat.idCategoria LEFT JOIN Foto_Receita fr ON fr.FKidReceita = r.idReceita');
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
@@ -61,14 +61,18 @@ exports.getReceitaById = async (req, res) => {
 
     // Consulta dos ingredientes relacionados
     const ingredientesQuery = `
-      SELECT 
-        i.nome AS nome_ingrediente,
-        rci.quant_ingrediente,
-        m.descricao AS nome_medida
-      FROM receita_contem_ingrediente rci
-      JOIN Ingrediente i ON rci.FKidIngrediente = i.idIngrediente
-      JOIN Medida m ON rci.FKMedida = m.idMedida
-      WHERE rci.FKidReceita = ?
+SELECT 
+  i.idIngrediente,
+  i.nome AS nome_ingrediente,
+  rci.quant_ingrediente,
+  m.idMedida,
+  m.descricao AS nome_medida,
+  rci.FKidReceita
+FROM receita_contem_ingrediente rci
+JOIN Ingrediente i ON rci.FKidIngrediente = i.idIngrediente
+JOIN Medida m ON rci.FKMedida = m.idMedida
+WHERE rci.FKidReceita = ?
+
     `;
 
     const [ingredientesRows] = await pool.query(ingredientesQuery, [idReceita]);
@@ -104,26 +108,74 @@ exports.updateReceita = async (req, res) => {
     res.status(500).json({ message: 'Erro ao atualizar receita' });
   }
 };
-exports.updateIngrediente = async (req, res) => {
-  const { FKidReceita } = req.params;
-  const { FKidIngrediente,FKMedida,quant_ingrediente} = req.body;
-    if (!FKidReceita || isNaN(Number(FKidReceita))) {
-    return res.status(400).json({ message: 'ID da receita inválido ou ausente.' });
+
+exports.updateIngredientesDaReceita = async (req, res) => {
+  const { idReceita } = req.params;
+  const novosIngredientes = req.body.ingredientes;
+
+  if (!Array.isArray(novosIngredientes)) {
+    return res.status(400).json({ message: 'Dados de ingredientes inválidos' });
   }
+
   try {
-    const [result] = await pool.query('UPDATE Receita SET FKidIngrediente, FKMedida = ?, quantidade_ingrediente = ?, FKcategoria = ? WHERE FKidReceita = ?',
-                                      [ FKidIngrediente,FKMedida,quant_ingrediente, FKidReceita]);
-    if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'Receita atualizada com sucesso' });
-      console.log("Receita atualizada com sucesso");
-    } else {
-      res.status(404).json({ message: 'Receita não encontrada' });
+    // 1. Buscar ingredientes atuais no banco
+    const [ingredientesAtuais] = await pool.query(
+      `SELECT FKidIngrediente, FKMedida, quant_ingrediente 
+       FROM receita_contem_ingrediente 
+       WHERE FKidReceita = ?`, 
+      [idReceita]
+    );
+
+    const ingredientesMap = new Map();
+    ingredientesAtuais.forEach(ing => {
+      ingredientesMap.set(ing.FKidIngrediente, ing);
+    });
+
+    // 2. Atualizar ou inserir novos
+    for (const novo of novosIngredientes) {
+      const existente = ingredientesMap.get(novo.FKidIngrediente);
+
+      if (existente) {
+        if (
+          existente.quant_ingrediente !== novo.quant_ingrediente ||
+          existente.FKMedida !== novo.FKMedida
+        ) {
+          await pool.query(
+            `UPDATE receita_contem_ingrediente 
+             SET quant_ingrediente = ?, FKMedida = ? 
+             WHERE FKidReceita = ? AND FKidIngrediente = ?`,
+            [novo.quant_ingrediente, novo.FKMedida, idReceita, novo.FKidIngrediente]
+          );
+        }
+
+        ingredientesMap.delete(novo.FKidIngrediente);
+      } else {
+        // Novo ingrediente
+        await pool.query(
+          `INSERT INTO receita_contem_ingrediente 
+           (FKidReceita, FKidIngrediente, FKMedida, quant_ingrediente)
+           VALUES (?, ?, ?, ?)`,
+          [idReceita, novo.FKidIngrediente, novo.FKMedida, novo.quant_ingrediente]
+        );
+      }
     }
+
+    // 3. Ingredientes removidos
+    for (const [idIngrediente] of ingredientesMap) {
+      await pool.query(
+        `DELETE FROM receita_contem_ingrediente 
+         WHERE FKidReceita = ? AND FKidIngrediente = ?`,
+        [idReceita, idIngrediente]
+      );
+    }
+
+    res.status(200).json({ message: 'Ingredientes atualizados com sucesso' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao atualizar receita' });
+    console.error('Erro ao atualizar ingredientes:', error);
+    res.status(500).json({ message: 'Erro ao atualizar ingredientes', error: error.message });
   }
 };
+
 
 // Função de deletar receita
 exports.deleteReceita = async (req, res) => {
@@ -168,19 +220,35 @@ exports.addIngredientes = async (req, res) => {
 
 
 exports.uploadFoto = async (req, res) => {
-  try {
-    const { nome_rct, cozinheiro, descricao } = req.body;
-    const fotoBuffer = req.file.buffer;
+  const { idReceita } = req.params;
+  const { descricao } = req.body;
 
+  // Verifica se foi enviado um arquivo
+  if (!req.file) {
+    return res.status(400).json({ message: 'Nenhuma foto enviada.' });
+  }
+
+  const fotoBuffer = req.file.buffer;
+
+  try {
+    // Verifica se a receita existe
+    const [receita] = await pool.query('SELECT * FROM Receita WHERE idReceita = ?', [idReceita]);
+
+    if (receita.length === 0) {
+      return res.status(404).json({ message: 'Receita não encontrada.' });
+    }
+
+    // Insere a foto vinculada à receita
     await pool.query(
-      `INSERT INTO Foto_Receita (FKnome_rct, FKcozinheiro, foto, descricao)
-       VALUES (?, ?, ?, ?)`,
-      [nome_rct, cozinheiro, fotoBuffer, descricao]
+      `INSERT INTO Foto_Receita (FKidReceita, foto, descricao)
+       VALUES (?, ?, ?)`,
+      [idReceita, fotoBuffer, descricao]
     );
 
-    res.status(201).json({ message: 'Foto salva com sucesso' });
+    res.status(201).json({ message: 'Foto da receita salva com sucesso!' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao salvar foto' });
+    console.error('Erro ao salvar a foto da receita:', error);
+    res.status(500).json({ message: 'Erro ao salvar foto', error: error.message });
   }
 };
+

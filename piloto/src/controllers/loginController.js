@@ -9,6 +9,15 @@ async function verificarLogin(req, res) {
     const usuario = await crudLogin.verificarLogin(email, senha);
 
     if (usuario) {
+
+      req.session.usuario = {
+        id: usuario.idUsuarios,
+        email: usuario.email,
+        nome: usuario.nome,
+        cargo: usuario.cargo
+      };
+      console.log('Usuário salvo na sessão:', req.session.usuario);
+      
       res.status(200).json({
         mensagem: 'Login bem-sucedido',
         usuario: {

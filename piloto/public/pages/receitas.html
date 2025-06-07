@@ -190,6 +190,72 @@
 .ingrediente-group button:hover {
   background-color: #cc0000;
 }
+
+.galeria-receitas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.card-receita {
+  background-color: #000d4d;
+  border-radius: 10px;
+  width: 220px;
+  padding: 15px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.card-receita img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #ccc;
+}
+
+.card-receita h3 {
+  margin: 10px 0 5px;
+  font-size: 18px;
+}
+
+.card-receita p {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.card-receita button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background-color: white;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+#formularioFoto {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #001060;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 2000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  color: white;
+  display: none; /* importante para o toggle funcionar bem */
+}
+
+#formularioFoto.show {
+  display: block;
+}
   </style>
 </head>
 <body>
@@ -204,19 +270,10 @@
 <!-- Div da Tabela -->
 <div id="paginaTabela">
   <h1 class="center">Lista de Receitas</h1>
-  <table id="tabelaReceita">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>Cargo</th>
-        <th>Ações</th> 
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-      <button class="add-button" onclick="mostrarFormularioCriar()">+</button>
+  <div id="galeriaReceitas" class="galeria-receitas"></div>
+  <button class="add-button" onclick="mostrarFormularioCriar()">+</button>
 </div>
+
 
 <!-- Div do Formulário -->
 <div id="paginaFormulario" class="hidden">
@@ -238,6 +295,7 @@
     <button type="button" onclick="voltarTabela()">Cancelar</button>
     </div>  
   </form>
+</div>
 
 
 <!-- Div do Formulário 2 -->
@@ -250,8 +308,22 @@
     <button type="submit">Salvar</button>
     <button type="button" onclick="voltarTabela()">Cancelar</button>
     </div>
+  </form>  
 </div>
 
+<div id="formularioFoto" class="">
+<form id="formFoto" enctype="multipart/form-data">
+
+  <label>Descrição:</label>
+  <input type="text" name="descricao" required>
+
+  <label>Foto da Receita:</label>
+  <input type="file" name="foto" accept="image/*" required>
+
+  <button type="submit">Enviar Foto</button>
+  <button type="button" onclick="fecharFormularioFoto()">Cancelar</button>
+</form>
+</div>
 <script>
 
 function formulario2(idReceita){
@@ -273,38 +345,56 @@ function formulario2(idReceita){
 
 
   
-  function carregarReceitas() {
-    fetch('/api/receita')
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.querySelector('#tabelaReceita tbody');
-        tbody.innerHTML = '';
-        data.forEach(r => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${r.idReceita}</td>
-            <td>${r.nome_rct}</td>
-             <td>${r.cozinheiro}</td>
-            <td>
-              <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
-              <button onclick="excluirReceita(${r.idReceita})">X</button>
-              <button onclick="editarReceita(${r.idReceita})">Editar</button>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
+function carregarReceitas() {
+  fetch('/api/receita')
+    .then(res => res.json())
+    .then(data => {
+      const galeria = document.getElementById('galeriaReceitas');
+      galeria.innerHTML = ''; // limpa os cards anteriores
+
+      data.forEach(r => {
+        const card = document.createElement('div');
+        card.classList.add('card-receita');
+
+        const foto = r.fotoBase64
+          ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome_rct}" />`
+          : `<div style="width: 180px; height: 180px; display:flex; align-items:center; justify-content:center; background-color:#999; border-radius:10px;">
+              <button type="button" onclick="adicionarFoto(${r.idReceita})"> <span>Sem foto</span></button>
+             </div>`;
+
+        card.innerHTML = `
+          ${foto}
+          <h3>${r.nome_rct}</h3>
+          <p>Chefe: ${r.cozinheiro}</p>
+          <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
+          <button onclick="editarReceita(${r.idReceita})">Editar</button>
+          <button onclick="excluirReceita(${r.idReceita})">Excluir</button>
+        `;
+
+        galeria.appendChild(card);
       });
-  }
+    })
+    .catch(err => console.error('Erro ao carregar receitas:', err));
+}
 
 
+function adicionarFoto(idReceita) {
+  const divForm = document.getElementById('formularioFoto');
+  divForm.classList.add('show');
+  divForm.classList.remove('hidden');
+
+  const form = document.getElementById('formFoto');
+  form.dataset.idReceita = idReceita;
+}
 
 function editarReceita(id) {
   fetch(`/api/receita/${id}`)
     .then(res => res.json())
     .then( async r => {
-document.getElementById('paginaFormulario2').classList.remove('hidden');
-document.getElementById('opcoes').classList.remove('hidden');
-document.getElementById('opcao2').classList.remove('hidden');
+document.getElementById('paginaFormulario2').classList.add('hidden');
+document.getElementById('opcao').classList.remove('hidden');
+document.getElementById('formReceita2').classList.add('hidden');
+document.getElementById('opcao2').classList.add('hidden');
       document.getElementById('formReceita').dataset.editingId = r.idReceita;
       document.getElementById('nome_rct').value = r.nome_rct;
       document.getElementById('dt_criacao').value = r.dt_criacao;
@@ -349,15 +439,17 @@ if (r.ingredientes && r.ingredientes.length > 0) {
 
     // Preenche os selects com dados
     carregarIngredientesNoSelect(grupo.querySelector('select[name="FKidIngrediente"]')).then(() => {
-      grupo.querySelector('select[name="FKidIngrediente"]').value = ing.nome_ingrediente;
+      grupo.querySelector('select[name="FKidIngrediente"]').value = ing.idIngrediente;
     });
 
     carregarMedidasNoSelect(grupo.querySelector('select[name="FKMedida"]')).then(() => {
-      grupo.querySelector('select[name="FKMedida"]').value = ing.nome_medida;
+      grupo.querySelector('select[name="FKMedida"]').value = ing.idMedida;
     });
 
     grupo.querySelector('input[name="quant_ingrediente"]').value = ing.quant_ingrediente;
+      console.log('Ingrediente:', ing.idIngrediente);
   });
+
 }
     })
     .catch(error => console.error('Erro ao carregar Receita:', error));
@@ -600,6 +692,9 @@ function fecharVisualizacao() {
   document.getElementById('formReceita').addEventListener('submit', function (e) {
   e.preventDefault();
 
+  document.getElementById('formReceita2').classList.remove('hidden');
+  document.getElementById('opcao').classList.add('hidden');
+
   const editingId = this.dataset.editingId;
 
   const nome_rct = document.getElementById('nome_rct').value;
@@ -645,47 +740,69 @@ function fecharVisualizacao() {
 });
 
 //Submit do Segundo Formulário
-document.getElementById('formReceita2').addEventListener('submit', function (e) {
+document.getElementById('formReceita2').addEventListener('submit', async function (e) {
   e.preventDefault();
 
   const editingId = this.dataset.editingId || sessionStorage.getItem('idReceita');
-  console.log('ID da receita no form 2:', this.dataset.editingId);
-  const url = `/api/receita/${editingId}/ingrediente`;
-  const grupos = document.querySelectorAll('.ingrediente-group');
+  const url = `/api/receita/${editingId}/ingredientes`;
 
+  const grupos = document.querySelectorAll('.ingrediente-group');
   const ingredientes = Array.from(grupos).map(grupo => {
     return {
-      FKidIngrediente: grupo.querySelector('select[name="FKidIngrediente"]').value,
-      FKMedida: grupo.querySelector('select[name="FKMedida"]').value,
-      quant_ingrediente: grupo.querySelector('input[name="quant_ingrediente"]').value
+      FKidIngrediente: parseInt(grupo.querySelector('select[name="FKidIngrediente"]').value),
+      FKMedida: parseInt(grupo.querySelector('select[name="FKMedida"]').value),
+      quant_ingrediente: parseFloat(grupo.querySelector('input[name="quant_ingrediente"]').value)
     };
   });
 
-  // Envia todos os ingredientes em sequência
-  Promise.all(
-    ingredientes.map(ingrediente =>
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ingrediente)
-      })
-    )
-  )
-  .then(responses => {
-    if (responses.some(res => !res.ok)) throw new Error('Erro ao salvar ingredientes');
-    return Promise.all(responses.map(res => res.json()));
-  })
-  .then(() => {
-    alert('Todos os ingredientes foram salvos com sucesso!');
-    document.getElementById('formReceita2').reset();
-    document.getElementById('opcoes').innerHTML = '';
-    voltarTabela();
-    carregarReceitas();
-  })
-  .catch(err => console.error(err));
+  // Enviar todos os ingredientes em uma única requisição PUT
+  try {
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ ingredientes }) // envia o array todo no formato correto
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert('Ingredientes atualizados com sucesso!');
+      document.getElementById('formReceita2').reset();
+      document.getElementById('opcoes').innerHTML = '';
+      voltarTabela();
+      carregarReceitas();
+    } else {
+      console.error(data);
+      alert('Erro ao atualizar ingredientes: ' + (data.message || 'Erro desconhecido.'));
+    }
+
+  } catch (error) {
+    console.error('Erro na requisição:', error);
+    alert('Erro ao atualizar ingredientes.');
+  }
 });
 
   carregarReceitas();
+
+  //Envio Formulário Foto
+    document.getElementById('formFoto').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const idReceita = form.dataset.idReceita; // exemplo, substitua pelo ID correto dinamicamente
+
+    const response = await fetch(`/api/receita/${idReceita}/foto`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+    alert(data.message);
+  });
 </script>
 
 </body>

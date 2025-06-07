@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const cargoController = require('../controllers/cargoController');
+const {authMiddleware} = require('../middlewares/auth');
 
 // Rota para criar um novo cargo
 router.post('/', cargoController.createCargo);

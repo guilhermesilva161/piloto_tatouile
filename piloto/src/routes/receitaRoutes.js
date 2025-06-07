@@ -22,9 +22,8 @@ router.get('/:idReceita', receitaController.getReceitaById);
 router.put('/:idReceita', receitaController.updateReceita);
 
 // Rota para atualizar uma receita existente (sem foto)
-router.put('/:idReceita/ingrediente/:idIngrediente', receitaController.updateIngrediente);
+router.put('/:idReceita/ingredientes/', receitaController.updateIngredientesDaReceita);
 
 // Rota para excluir uma receita
 router.delete('/:idReceita', receitaController.deleteReceita);
-
 module.exports = router;

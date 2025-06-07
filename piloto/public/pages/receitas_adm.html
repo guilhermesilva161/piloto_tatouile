@@ -209,7 +209,8 @@
       <tr>
         <th>ID</th>
         <th>Nome</th>
-        <th>Cargo</th>
+        <th>Categoria</th>
+        <th>Chefe</th>
         <th>Ações</th> 
       </tr>
     </thead>
@@ -217,61 +218,7 @@
   </table>
 </div>
 
-<!-- Div do Formulário -->
-<div id="paginaFormulario" class="hidden">
-  <h1 class="center">Cadastrar Nova Receita</h1>
-  <form id="formReceita" class="center" enctype="multipart/form-data">
-    <input type="text" id="nome_rct" placeholder="Nome Receita" required /><br>
-    <input type="date" id="dt_criacao" placeholder="Data de Criação" required /><br>
-    <input type="text" id="cozinheiro" placeholder="Cozinheiro" required /><br>
-    <input type="number" id="quantidade_porcao" placeholder="Quantidade Porção" required /><br>   
-    <input type="text" id="ind_rec_inedita" placeholder="Receita Inédita (S /N )" required /><br>     
-    <input type="text" id="preparo" placeholder="Modo de Preparo" required /><br><br>
-    <select id="FKcategoria" required>
-      <option value="">Selecione a Categoria</option>
-    </select>
-    <br>
-    <br>
-    <div id="opcao">
-    <button type="submit">Salvar</button>
-    <button type="button" onclick="voltarTabela()">Cancelar</button>
-    </div>  
-  </form>
-
-
-<!-- Div do Formulário 2 -->
- <div id="paginaFormulario2" class="hidden">
-  <form id="formReceita2" class="center" enctype="multipart/form-data">
-
-    <button type="button" onclick="adicionarIngrediente()">Adicionar Ingrediente</button>
-    <div id="opcoes" class="hidden"></div>
-    <div id="opcao2">
-    <button type="submit">Salvar</button>
-    <button type="button" onclick="voltarTabela()">Cancelar</button>
-    </div>
-</div>
-
-<script>
-
-function formulario2(idReceita){
-  document.getElementById('opcao2').classList.remove('hidden');
-  carregarMedidasNoSelect();
-  carregarIngredientesNoSelect();
-
-  const form2 = document.getElementById('formReceita2');
-  if(idReceita){
-    form2.dataset.editingId = idReceita;
-    sessionStorage.setItem('idReceita', idReceita);
-  }
-
-  document.getElementById('paginaTabela').classList.add('hidden');
-  document.getElementById('paginaFormulario2').classList.remove('hidden');
-}
-
-
-
-
-  
+<script>  
   function carregarReceitas() {
     fetch('/api/receita')
       .then(res => res.json())
@@ -283,6 +230,7 @@ function formulario2(idReceita){
           row.innerHTML = `
             <td>${r.idReceita}</td>
             <td>${r.nome_rct}</td>
+            <td>${r.nome_categoria}</td>
              <td>${r.cozinheiro}</td>
             <td>
               <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
@@ -295,235 +243,11 @@ function formulario2(idReceita){
 
 
 
-function editarReceita(id) {
-  fetch(`/api/receita/${id}`)
-    .then(res => res.json())
-    .then( async r => {
-document.getElementById('paginaFormulario2').classList.remove('hidden');
-document.getElementById('opcoes').classList.remove('hidden');
-document.getElementById('opcao2').classList.remove('hidden');
-      document.getElementById('formReceita').dataset.editingId = r.idReceita;
-      document.getElementById('nome_rct').value = r.nome_rct;
-      document.getElementById('dt_criacao').value = r.dt_criacao;
-      document.getElementById('preparo').value = r.preparo;
-      document.getElementById('FKcategoria').value = r.FKcategoria;
-      document.getElementById('cozinheiro').value = r.FKcozinheiro;
-      document.getElementById('ind_rec_inedita').value = r.ind_rec_inedita;
-      document.getElementById('quantidade_porcao').value = r.quantidade_porcao;
-
-      sessionStorage.setItem('idReceita', r.idReceita);
-      sessionStorage.setItem('nome_rct', r.nome_rct);
-      sessionStorage.setItem('cozinheiro', r.cozinheiro);
-      setTimeout(() => {
-        document.getElementById('FKMedida').value = r.FKMedida;
-      }, 100);
-
-      const form2 = document.getElementById('formReceita2');
-      form2.dataset.editingId = r.idReceita;
-
-      mostrarFormularioEditar();
-      await carregarMedidasNoSelect(); 
-      await carregarIngredientesNoSelect();
-      await carregarCategoriaNoSelect();
-
-       const container = document.getElementById('opcoes');
-container.innerHTML = '';
-container.classList.remove('hidden');
-
-// Verifica se há ingredientes
-if (r.ingredientes && r.ingredientes.length > 0) {
-  r.ingredientes.forEach(ing => {
-    const grupo = document.createElement('div');
-    grupo.classList.add('ingrediente-group');
-    grupo.innerHTML = `
-      <select name="FKidIngrediente" required></select>
-      <select name="FKMedida" required></select>
-      <input type="number" name="quant_ingrediente" placeholder="Quantidade de Ingredientes" required />
-      <button type="button" onclick="this.parentElement.remove()">Remover</button>
-    `;
-
-    container.appendChild(grupo);
-
-    // Preenche os selects com dados
-    carregarIngredientesNoSelect(grupo.querySelector('select[name="FKidIngrediente"]')).then(() => {
-      grupo.querySelector('select[name="FKidIngrediente"]').value = ing.nome_ingrediente;
-    });
-
-    carregarMedidasNoSelect(grupo.querySelector('select[name="FKMedida"]')).then(() => {
-      grupo.querySelector('select[name="FKMedida"]').value = ing.nome_medida;
-    });
-
-    grupo.querySelector('input[name="quant_ingrediente"]').value = ing.quant_ingrediente;
-  });
-}
-    })
-    .catch(error => console.error('Erro ao carregar Receita:', error));
-}
-
-function carregarMedidasNoSelect(selectElement) {
-  return fetch('/api/medida')
-    .then(res => res.json())
-    .then(data => {
-      const select = selectElement || document.getElementById('FKMedida');
-      select.innerHTML = '<option value="">Selecione a Medida</option>';
-      data.forEach(m => {
-        const option = document.createElement('option');
-        option.value = m.idMedida;
-        option.textContent = m.descricao;
-        select.appendChild(option);
-      });
-    })
-    .catch(err => console.error('Erro ao carregar Medidas:', err));
-}
-
-function adicionarIngrediente() {
-  document.getElementById('opcao').classList.add('hidden');
-  document.getElementById('opcao2').classList.remove('hidden');
-  const container = document.getElementById('opcoes');
-  container.classList.remove('hidden');
-
-  const grupo = document.createElement('div');
-  grupo.classList.add('ingrediente-group');
-  grupo.innerHTML = `
-    <select name="FKidIngrediente" required>
-      <option value="">Selecione o Ingrediente</option>
-    </select>
-
-    <select name="FKMedida" required>
-      <option value="">Selecione a Medida</option>
-    </select>
-
-    <input type="number" name="quant_ingrediente" placeholder="Quantidade de Ingredientes" required />
-    <button type="button" onclick="this.parentElement.remove()">Remover</button>
-    <br><br>
-  `;
-  container.appendChild(grupo);
-
-  // Preenche os selects recém-criados
-  carregarIngredientesNoSelect(grupo.querySelector('select[name="FKidIngrediente"]'));
-  carregarMedidasNoSelect(grupo.querySelector('select[name="FKMedida"]'));
-}
-
-function carregarCategoriaNoSelect(select) {
-  fetch('/api/categoria')
-    .then(res => res.json())
-    .then(data => {
-      const select = document.getElementById('FKcategoria');
-      select.innerHTML = '<option value="">Selecione a Categoria</option>'; //
-
-      data.forEach(categ=> {
-        const option = document.createElement('option');
-        option.value = categ.idCategoria;          // o valor enviado no formulário é o id
-        option.textContent = categ.nome;  // o texto visível é a descrição
-        select.appendChild(option);
-      });
-    })
-    .catch(err => console.error('Erro ao carregar Categoria:', err));
-}
-
-
-function carregarIngredientesNoSelect(selectElement) {
-  return fetch('/api/ingrediente')
-    .then(res => res.json())
-    .then(data => {
-      const select = selectElement || document.getElementById('FKidIngrediente');
-      select.innerHTML = '<option value="">Selecione o Ingrediente</option>';
-      data.forEach(i => {
-        const option = document.createElement('option');
-        option.value = i.idIngrediente;
-        option.textContent = i.nome;
-        select.appendChild(option);
-      });
-    })
-    .catch(err => console.error('Erro ao carregar Ingredientes:', err));
-}
-
-function carregarIngredientesDaReceita(idReceita) {
-  fetch(`/api/receita/${idReceita}/ingredientes`)
-    .then(res => res.json())
-    .then(ingredientes => {
-      const container = document.getElementById('opcoes');
-      container.innerHTML = ''; // limpa os ingredientes já existentes
-
-      ingredientes.forEach(ing => {
-        const grupo = document.createElement('div');
-        grupo.classList.add('ingrediente-group');
-        grupo.innerHTML = `
-          <select name="FKidIngrediente" required></select>
-          <select name="FKMedida" required></select>
-          <input type="number" name="quant_ingrediente" placeholder="Quantidade de Ingredientes" required />
-          <button type="button" onclick="this.parentElement.remove()">Remover</button>
-          <br><br>
-        `;
-
-        container.appendChild(grupo);
-
-        // Carregar opções nos selects recém-criados
-          carregarIngredientesNoSelect(grupo.querySelector('select[name="FKidIngrediente"]')).then(() => {
-            grupo.querySelector('select[name="FKidIngrediente"]').value = ing.FKidIngrediente;
-          });
-
-          carregarMedidasNoSelect(grupo.querySelector('select[name="FKMedida"]')).then(() => {
-            grupo.querySelector('select[name="FKMedida"]').value = ing.FKMedida;
-          });
-
-          grupo.querySelector('input[name="quant_ingrediente"]').value = ing.quant_ingrediente;
-        });
-
-      // Mostrar o container que pode estar escondido
-      container.classList.remove('hidden');
-    })
-    .catch(err => {
-      console.error('Erro ao carregar ingredientes da receita:', err);
-    });
-}
-
-
-function mostrarFormularioCriar() {
-  document.getElementById('opcao').classList.remove('hidden');
-  const form = document.getElementById('formReceita');
-  form.reset();
-  delete form.dataset.editingId;
-
-  carregarMedidasNoSelect();
-  carregarIngredientesNoSelect();
-  carregarCategoriaNoSelect();
-
-  document.getElementById('paginaTabela').classList.add('hidden');
-  document.getElementById('paginaFormulario').classList.remove('hidden');
-}
-
-  function mostrarFormularioEditar() {
-    carregarMedidasNoSelect();
-    carregarIngredientesNoSelect();
-    carregarCategoriaNoSelect();
-    document.getElementById('paginaTabela').classList.add('hidden');
-    document.getElementById('paginaFormulario').classList.remove('hidden');
-    document.getElementById('paginaFormulario2').classList.remove('hidden');
-  }
-
-
   function voltarTabela() {
     document.getElementById('paginaFormulario').classList.add('hidden');
     document.getElementById('paginaFormulario2').classList.add('hidden');
     document.getElementById('paginaTabela').classList.remove('hidden');
   }
-
-  function excluirReceita(id) {
-  if (confirm('Tem certeza que deseja excluir esta receita?')) {
-    fetch(`/api/receita/${id}`, {
-      method: 'DELETE'
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Erro ao excluir Receita');
-      return res.json();
-    })
-    .then(() => {
-      carregarReceitas(); // atualiza a tabela
-    })
-    .catch(error => console.error('Erro:', error));
-  }
-}
 
 
 function visualizarReceita(id) {
@@ -587,100 +311,12 @@ function visualizarReceita(id) {
 }
 
 function fecharVisualizacao() {
+  carregarReceitas();
   const modal = document.getElementById('modalVisualizacao');
   if (modal) modal.style.display = 'none';
     document.getElementById('paginaTabela').classList.remove('hidden');
+    
 }
-
-
-//Submit do Primeiro Formulário
-  document.getElementById('formReceita').addEventListener('submit', function (e) {
-  e.preventDefault();
-
-  const editingId = this.dataset.editingId;
-
-  const nome_rct = document.getElementById('nome_rct').value;
-  const dt_criacao = document.getElementById('dt_criacao').value;
-  const preparo = document.getElementById('preparo').value;
-  const cozinheiro = document.getElementById('cozinheiro').value;
-  const ind_rec_inedita = document.getElementById('ind_rec_inedita').value;
-  const quantidade_porcao = document.getElementById('quantidade_porcao').value;
-  const FKcategoria = document.getElementById('FKcategoria').value;
-
-  const dados = {
-    nome_rct,
-    dt_criacao,
-    cozinheiro,
-    preparo,
-    ind_rec_inedita,
-    quantidade_porcao,
-    FKcategoria
-  }
-
-
-  const url = editingId ? `/api/receita/${editingId}` : '/api/receita';
-  const method = editingId ? 'PUT' : 'POST';
-
-
-  fetch(url, {
-    method: method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dados) // não colocar headers! o navegador define com boundary
-  })
-    .then(res => {
-      if (!res.ok)
-      throw new Error('Erro ao salvar Receita');
-      return res.json();
-    })
-    .then((data) => {
-      sessionStorage.setItem('idReceita', data.idReceita);
-      sessionStorage.setItem('FKcategoria', data.FKcategoria);
-      document.getElementById('formReceita2').dataset.editingId = data.idReceita;
-      formulario2(editingId);
-    })
-    .catch(error => console.error('Erro:', error));
-});
-
-//Submit do Segundo Formulário
-document.getElementById('formReceita2').addEventListener('submit', function (e) {
-  e.preventDefault();
-
-  const editingId = this.dataset.editingId || sessionStorage.getItem('idReceita');
-  console.log('ID da receita no form 2:', this.dataset.editingId);
-  const url = `/api/receita/${editingId}/ingrediente`;
-  const grupos = document.querySelectorAll('.ingrediente-group');
-
-  const ingredientes = Array.from(grupos).map(grupo => {
-    return {
-      FKidIngrediente: grupo.querySelector('select[name="FKidIngrediente"]').value,
-      FKMedida: grupo.querySelector('select[name="FKMedida"]').value,
-      quant_ingrediente: grupo.querySelector('input[name="quant_ingrediente"]').value
-    };
-  });
-
-  // Envia todos os ingredientes em sequência
-  Promise.all(
-    ingredientes.map(ingrediente =>
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ingrediente)
-      })
-    )
-  )
-  .then(responses => {
-    if (responses.some(res => !res.ok)) throw new Error('Erro ao salvar ingredientes');
-    return Promise.all(responses.map(res => res.json()));
-  })
-  .then(() => {
-    alert('Todos os ingredientes foram salvos com sucesso!');
-    document.getElementById('formReceita2').reset();
-    document.getElementById('opcoes').innerHTML = '';
-    voltarTabela();
-    carregarReceitas();
-  })
-  .catch(err => console.error(err));
-});
 
   carregarReceitas();
 </script>
