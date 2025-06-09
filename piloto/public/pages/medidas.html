@@ -11,37 +11,55 @@
     }
 
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       background-color: #000937;
       color: white;
-      padding: 0 20px;
+      padding-top: 90px; /* Espaço para a navegação fixa aumentada */
     }
-
     nav {
-      background-color: #001060;
+      background-color: #001060; /* Cor de fundo da barra de navegação principal */
       display: flex;
-      padding: 10px;
-      gap: 10px;
+      align-items: center;
+      justify-content: center; /* Centraliza os itens horizontalmente */
+      padding: 0 10px;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
+      height: 80px; /* Altura da navbar aumentada */
       z-index: 1000;
+      gap: 15px; /* Aumentado o gap entre os botões */
+    }
+
+    nav .back-button {
+      background-color: transparent;
+      color: white;
+      border: none;
+      font-size: 32px; /* Tamanho da seta aumentado */
+      padding: 10px 15px;
+      cursor: pointer;
+      position: absolute; /* Posiciona o botão de voltar absolutamente */
+      left: 20px; /* Distância da esquerda */
     }
 
     nav a {
-      background-color: #0030a0;
+      background-color: #001f75; /* Cor dos botões da nav */
       color: white;
       text-decoration: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: bold;
+      padding: 14px 27px; /* Aumentado padding para botões maiores */
+      border-radius: 5px; /* Bordas levemente arredondadas */
+      font-weight: normal; /* Removido bold por padrão */
+      font-size: 20px; /* Tamanho da fonte dos botões aumentado */
+      text-align: center;
+      display: inline-block;
+      line-height: 1.5; /* Alinhamento vertical do texto */
+      transition: background-color 0.3s, color 0.3s; /* Transição suave */
     }
 
     nav a.active {
       background-color: white;
       color: #001060;
-      border: 2px solid white;
+      font-weight: bold;
     }
 
     .container {
@@ -55,25 +73,30 @@
     }
 
     .search-container {
-      display: flex;
-      align-items: center;
+      position: relative;
+      width: 300px; /* tamanho menor */
       margin-bottom: 20px;
-      gap: 10px;
     }
 
     .search-container input {
-      flex: 1;
-      padding: 10px;
+      width: 100%;
+      padding: 10px 40px 10px 15px; /* espaço para a lupa no lado direito */
       border-radius: 8px;
       border: none;
       font-size: 16px;
     }
 
-    .search-container img {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
+    .search-container .icon-lupa {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+      fill: #888;
     }
+
 
     table {
       width: 100%;
@@ -145,9 +168,34 @@
 </head>
 <body>
 
+    <nav>
+    <button class="back-button" onclick="goBack()">&#x2190;</button> 
+    <a href="receitas.html">Receitas</a>
+    <a href="#medidas" class="active">Medidas</a>
+    <a href="ingredientes.html">Ingredientes</a>
+  </nav>  
+
   <!-- Página da Tabela -->
   <div id="paginaTabela">
-    <h1>Lista de Medidas</h1>
+    <div class="search-container">
+      <input
+        type="text"
+        id="filtroNome"
+        placeholder="Pesquisar Medida pelo nome"
+      />
+      <svg
+        class="icon-lupa"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"
+        />
+      </svg>
+    </div>
+    <h1>Medidas:</h1>
     <button class="hidden" onclick="mostrarFormulario()">Adicionar Medida</button>
     <table id="tabelaMedida">
       <thead>
@@ -179,30 +227,46 @@
 
   let modoEdicao = false;
 
-  const tbody = document.querySelector('#tabelaMedida tbody');
 
-  function carregarMedida() {
-    fetch('/api/medida')
-      .then(response => response.json())
-      .then(data => {
-        tbody.innerHTML = '';
-        data.forEach(medida => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
+  const tbody = document.querySelector('#tabelaMedida tbody');
+    let medidasCarregadas = [];
+
+  
+    function carregarMedidas() {
+      fetch('/api/medida')
+        .then((response) => response.json())
+        .then((data) => {
+          medidasCarregadas = data; // armazena os dados
+          mostrarMedidas(data);
+        })
+        .catch((error) => {
+          console.error('Erro ao buscar dados:', error);
+        });
+    }
+
+        function mostrarMedidas(medida) {
+      tbody.innerHTML = '';
+      medida.forEach((medida) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
             <td>${medida.idMedida}</td>
             <td>${medida.descricao}</td>
             <td>
                 <button class="excluir" onclick="excluirMedida(${medida.idMedida})">X</button>
-                <button onclick="editarMedida(${medida.idMedida})">Editar</button>
+                <button onclick="editarMedida(${medida.descricao})">Editar</button>
             </td>
           `;
-          tbody.appendChild(row);
-        });
-      })
-      .catch(error => {
-        console.error('Erro ao buscar dados:', error);
+        tbody.appendChild(row);
       });
-  }
+    }
+
+      document.getElementById('filtroNome').addEventListener('input', function () {
+      const filtro = this.value.toLowerCase();
+      const filtrados = medidasCarregadas.filter((m) =>
+        m.descricao.toLowerCase().startsWith(filtro)
+      );
+      mostrarMedidas(filtrados);
+    });
 
   function excluirMedida(id) {
     if (confirm('Tem certeza que deseja excluir esta medida?')) {
@@ -276,7 +340,7 @@
     .catch(error => console.error('Erro ao salvar:', error));
   });
 
-  carregarMedida();
+  carregarMedidas();
   </script>
 </body>
 </html>

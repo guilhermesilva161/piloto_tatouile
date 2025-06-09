@@ -1,0 +1,52 @@
+const pool = require('../database/conexao'); // Importando a conexão com o banco de dados
+
+exports.salvarDegustacao = async (req, res) => {
+  const {
+    nota_degustacao,
+    data_degustacao,
+    FKnome_rct,
+    FKcozinheiro,
+    FKdegustador
+  } = req.body;
+    const sql = `
+      INSERT INTO Degustacao 
+      (nota_degustacao, data_degustacao, FKnome_rct, FKcozinheiro, FKdegustador)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    await pool.query(sql, [
+      nota_degustacao,
+      data_degustacao,
+      FKnome_rct,
+      FKcozinheiro,
+      FKdegustador
+    ]);
+
+    return res.status(201).json({ mensagem: 'Avaliação salva com sucesso!' });
+  }
+
+
+exports.getAllDegustacao = async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM Degustacao');
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar degustacao' });
+  }
+};
+
+exports.getDegustacaoById = async (req, res) => {
+  const { idDegustacao } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM Degustacao WHERE idDegustacao = ?', [idDegustacao]);
+    if (rows.length > 0) {
+      res.status(200).json(rows[0]);
+    } else {
+      res.status(404).json({ message: 'Degustacao não encontrada' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar degutascao' });
+  }
+};

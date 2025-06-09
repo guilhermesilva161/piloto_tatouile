@@ -12,6 +12,7 @@ const medidaRoutes = require('./routes/medidaRoutes');
 const ingredienteRoutes = require('./routes/ingredienteRoutes');
 const restauranteRoutes = require('./routes/restauranteRoutes');
 const receitaRoutes = require('./routes/receitaRoutes');
+const degustacaoRoutes = require ('./routes/degustacaoRoutes');
 const {authMiddleware, requireAuth} = require('./middlewares/auth');
 
 const app = express();
@@ -55,6 +56,9 @@ app.use('/api/restaurante', restauranteRoutes);
 
 // Usando o roteador de receitas
 app.use('/api/receita', receitaRoutes);
+
+// Usando o roteador de degustacao
+app.use('/api/degustacao', degustacaoRoutes);
 
 
 app.get('/api/receita', authMiddleware, (req, res) => {

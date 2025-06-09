@@ -348,27 +348,4 @@ VALUES (
 INSERT INTO Usuarios (email, senha, FKfuncionario)
 VALUES ('exemplo123@gmail.com', 'senha_aqui', 1);
 
-
-//ALTERAR NO BANCO DEPOIS 
-ALTER TABLE usuarios
-DROP FOREIGN KEY fk_Usuarios_Funcionario1;
-
-ALTER TABLE usuarios
-ADD CONSTRAINT fk_Usuarios_Funcionario1
-FOREIGN KEY (FKfuncionario)
-REFERENCES funcionario(idFuncionario)
-ON DELETE CASCADE;
-
-
-
-ALTER TABLE receita_contem_ingrediente
-DROP FOREIGN KEY fk_Receita_has_Ingrediente_Receita1;
-
-ALTER TABLE receita_contem_ingrediente
-ADD CONSTRAINT fk_Receita_has_Ingrediente_Receita1
-FOREIGN KEY (FKnome_rct, FKcozinheiro)
-REFERENCES receita(nome_rct, cozinheiro)
-ON DELETE CASCADE;
-
-
  */

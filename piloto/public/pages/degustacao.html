@@ -61,6 +61,8 @@
       color: #001060;
       font-weight: bold;
     }
+
+
     .container {
       margin-top: 80px;
       padding: 20px;
@@ -207,110 +209,96 @@
 .ingrediente-group button:hover {
   background-color: #cc0000;
 }
-.galeria-receitas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  margin-top: 20px;
-}
 
-.card-receita {
-  background-color: #000d4d;
+.avaliacao-popup {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -30%);
+  background: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  z-index: 1000;
+  width: 300px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
   border-radius: 10px;
-  width: 220px;
-  padding: 15px;
-  color: white;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
 }
-
-.card-receita img {
-  width: 180px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 10px;
-  background: #ccc;
-}
-
-.card-receita h3 {
-  margin: 10px 0 5px;
-  font-size: 18px;
-}
-
-.card-receita p {
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-.card-receita button {
-  display: block;
-  width: 100%;
-  margin: 5px 0;
-  padding: 8px;
-  border: none;
-  border-radius: 6px;
-  background-color: white;
-  color: black;
-  font-weight: bold;
+.estrelas span {
+  font-size: 30px;
+  color: gray;
   cursor: pointer;
 }
+.estrelas span.selecionada {
+  color: gold;
+}
+
   </style>
 </head>
 <body>
-    <nav>
+
+  <nav>
     <button class="back-button" onclick="goBack()">&#x2190;</button> 
-    <a href="#receitas_adm" class="active">Receitas</a>
-    <a href="categoria.html">Categorias</a>
-    <a href="funcionario.html">Funcionários</a>
-    <a href="cargos.html">Cargos</a>
-    <a href="restaurante.html">Restaurantes</a>
+    <a href="degustacao.html">Degustacao</a>
   </nav>
+
+
+  <div id="avaliacaoForm" style="display: none;" class="avaliacao-popup">
+  <h3>Avaliar Receita</h3>
+  <div id="estrelas" class="estrelas"></div>
+  <input type="date" placeholder="Data" id="data_degustacao">
+  <input type="text" placeholder="Nome Receita" id="FKnome_rct">
+  <input type="number" placeholder="Cozinheiro" id="FKcozinheiro">
+  <input type="number" placeholder="Degustador" id="FKdegustador">
+  <button onclick="enviarAvaliacao()">Enviar</button>
+  <button onclick="fecharAvaliacao()">Cancelar</button>
+</div>
+
+<!-- Botão para abrir o formulário -->
+<div class="center">
+  <button  class = "hidden" onclick="mostrarFormulario()">Adicionar Receita</button>
+</div>
+
 
 
 <!-- Div da Tabela -->
 <div id="paginaTabela">
-  <h1 class="center">Receitas:</h1>
-  <div id="galeriaReceitas" class="galeria-receitas"></div>
+  <h1 class="center">Lista de Receitas</h1>
+  <table id="tabelaReceita">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Cargo</th>
+        <th>Ações</th> 
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
-<script>  
+<script>
 
-function carregarReceitas() {
-  fetch('/api/receita')
-    .then(res => res.json())
-    .then(data => {
-      const galeria = document.getElementById('galeriaReceitas');
-      galeria.innerHTML = ''; // limpa os cards anteriores
+  function carregarReceitas() {
+    fetch('/api/receita')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector('#tabelaReceita tbody');
+        tbody.innerHTML = '';
+        data.forEach(r => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${r.idReceita}</td>
+            <td>${r.nome_rct}</td>
+             <td>${r.cozinheiro}</td>
+            <td>
+  <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
+  <button onclick="avaliarReceita(${r.idReceita})">Avaliar</button>
+</td>
 
-      data.forEach(r => {
-        const card = document.createElement('div');
-        card.classList.add('card-receita');
-
-        const foto = r.fotoBase64
-          ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome_rct}" />`
-          : `<div style="width: 180px; height: 180px; display:flex; align-items:center; justify-content:center; background-color:#999; border-radius:10px;">
-              <button type="button" onclick="adicionarFoto(${r.idReceita})"> <span>Sem foto</span></button>
-             </div>`;
-
-        card.innerHTML = `
-          ${foto}
-          <h3>${r.nome_rct}</h3>
-          <p>Chefe: ${r.cozinheiro}</p>
-          <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
-        `;
-
-        galeria.appendChild(card);
+          `;
+          tbody.appendChild(row);
+        });
       });
-    })
-    .catch(err => console.error('Erro ao carregar receitas:', err));
-}
-
-
-  function voltarTabela() {
-    document.getElementById('paginaFormulario').classList.add('hidden');
-    document.getElementById('paginaFormulario2').classList.add('hidden');
-    document.getElementById('paginaTabela').classList.remove('hidden');
   }
 
 
@@ -375,14 +363,77 @@ function visualizarReceita(id) {
 }
 
 function fecharVisualizacao() {
-  carregarReceitas();
   const modal = document.getElementById('modalVisualizacao');
   if (modal) modal.style.display = 'none';
     document.getElementById('paginaTabela').classList.remove('hidden');
-    
+}
+carregarReceitas();
+
+let idReceitaSelecionada = null;
+let notaSelecionada = 0;
+
+function avaliarReceita(id) {
+  idReceitaSelecionada = id;
+  notaSelecionada = 0;
+
+  document.getElementById("avaliacaoForm").style.display = "block";
+  renderizarEstrelas();
 }
 
-  carregarReceitas();
+function fecharAvaliacao() {
+  document.getElementById("avaliacaoForm").style.display = "none";
+}
+
+function renderizarEstrelas() {
+  const container = document.getElementById("estrelas");
+  container.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const estrela = document.createElement("span");
+    estrela.innerHTML = "★";
+    estrela.classList.toggle("selecionada", i <= notaSelecionada);
+    estrela.onclick = () => {
+      notaSelecionada = i;
+      renderizarEstrelas();
+    };
+    container.appendChild(estrela);
+  }
+}
+
+function enviarAvaliacao() {
+  const nome_rct = document.getElementById("FKnome_rct").value;
+  const cozinheiro= document.getElementById("FKcozinheiro").value;
+  const degustador = document.getElementById("FKdegustador").value;
+  const data = document.getElementById("data_degustacao").value;
+
+  if (notaSelecionada === 0) {
+    alert("Selecione uma nota de 1 a 5 estrelas.");
+    return;
+  }
+
+  const dados = {
+    idReceita: idReceitaSelecionada,
+    nota_degustacao: notaSelecionada,
+    FKnome_rct:nome_rct,
+    FKcozinheiro:cozinheiro,
+    FKdegustador:degustador,
+    data_degustacao:data
+  };
+
+  fetch("/api/degustacao", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dados)
+  })
+  .then(res => {
+    if (res.ok) {
+      alert("Avaliação enviada com sucesso!");
+      fecharAvaliacao();
+    } else {
+      alert("Erro ao enviar avaliação.");
+    }
+  });
+}
+
 </script>
 
 </body>
