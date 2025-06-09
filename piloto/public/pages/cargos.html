@@ -374,6 +374,10 @@ const url = modoEdicao ? `/api/cargos/${IdCargo}` : '/api/cargos';
 
 
   carregarCargos();
+      function goBack() {
+      // Volta para a página anterior no histórico do navegador
+      window.history.back(); 
+    }
 </script>
 </body>
 </html>

@@ -823,6 +823,10 @@ document.getElementById('formReceita2').addEventListener('submit', async functio
     const data = await response.json();
     alert(data.message);
   });
+      function goBack() {
+      // Volta para a página anterior no histórico do navegador
+      window.history.back(); 
+    }
 </script>
 
 </body>

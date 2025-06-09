@@ -141,85 +141,71 @@
       text-align: center;
     }
 
-    .add-button {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: white;
-      color: black;
-      font-size: 24px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-    }
-
     form input {
       width: 80%;
       margin-bottom: 10px;
     }
 
-    /*Opções ingredientes*/
-    #opcoes {
+
+
+.galeria-receitas {
   display: flex;
-  flex-direction: column;
-  align-items: center; /* Centraliza os grupos de ingredientes horizontalmente */
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
   margin-top: 20px;
 }
-    .ingrediente-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
 
-.ingrediente-group select,
-.ingrediente-group input {
-  padding: 8px;
-  border-radius: 6px;
-  border: none;
-  font-size: 14px;
-}
-
-.ingrediente-group select[name="FKidIngrediente"] {
-  width: 200px;
-}
-
-.ingrediente-group select[name="FKMedida"] {
-  width: 120px;
-}
-
-.ingrediente-group input[name="quant_ingrediente"] {
-  width: 100px;
-}
-
-.ingrediente-group button {
-  background-color: #ff4d4d;
+.card-receita {
+  background-color: #000d4d;
+  border-radius: 10px;
+  width: 220px;
+  padding: 15px;
   color: white;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.card-receita img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #ccc;
+}
+
+.card-receita h3 {
+  margin: 10px 0 5px;
+  font-size: 18px;
+}
+
+.card-receita p {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.card-receita button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
   border: none;
-  padding: 8px 12px;
   border-radius: 6px;
+  background-color: white;
+  color: black;
+  font-weight: bold;
   cursor: pointer;
 }
-
-.ingrediente-group button:hover {
-  background-color: #cc0000;
-}
-
 .avaliacao-popup {
   position: fixed;
-  top: 30%;
+  top: 35%;
   left: 50%;
   transform: translate(-50%, -30%);
-  background: white;
-  border: 1px solid #ccc;
+  background: #000937;
   padding: 20px;
   z-index: 1000;
-  width: 300px;
+  width:1250px;
+  height: 800px;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
   border-radius: 10px;
 }
@@ -238,7 +224,7 @@
 
   <nav>
     <button class="back-button" onclick="goBack()">&#x2190;</button> 
-    <a href="degustacao.html">Degustacao</a>
+    <a href="degustacao.html">Degustação</a>
   </nav>
 
 
@@ -262,45 +248,42 @@
 
 <!-- Div da Tabela -->
 <div id="paginaTabela">
-  <h1 class="center">Lista de Receitas</h1>
-  <table id="tabelaReceita">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>Cargo</th>
-        <th>Ações</th> 
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <h1 class="center">Receitas:</h1>
+  <div id="galeriaReceitas" class="galeria-receitas"></div>
 </div>
 
 <script>
 
-  function carregarReceitas() {
-    fetch('/api/receita')
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.querySelector('#tabelaReceita tbody');
-        tbody.innerHTML = '';
-        data.forEach(r => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${r.idReceita}</td>
-            <td>${r.nome_rct}</td>
-             <td>${r.cozinheiro}</td>
-            <td>
-  <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
-  <button onclick="avaliarReceita(${r.idReceita})">Avaliar</button>
-</td>
+function carregarReceitas() {
+  fetch('/api/receita')
+    .then(res => res.json())
+    .then(data => {
+      const galeria = document.getElementById('galeriaReceitas');
+      galeria.innerHTML = ''; // limpa os cards anteriores
 
-          `;
-          tbody.appendChild(row);
-        });
+      data.forEach(r => {
+        const card = document.createElement('div');
+        card.classList.add('card-receita');
+
+        const foto = r.fotoBase64
+          ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome_rct}" />`
+          : `<div style="width: 180px; height: 180px; display:flex; align-items:center; justify-content:center; background-color:#999; border-radius:10px;">
+              <span>Sem foto</span></button>
+             </div>`;
+
+        card.innerHTML = `
+          ${foto}
+          <h3>${r.nome_rct}</h3>
+          <p>Chefe: ${r.cozinheiro}</p>
+          <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
+          <button onclick="avaliarReceita(${r.idReceita})">Avaliar</button>
+        `;
+
+        galeria.appendChild(card);
       });
-  }
-
+    })
+    .catch(err => console.error('Erro ao carregar receitas:', err));
+}
 
 function visualizarReceita(id) {
   fetch(`/api/receita/${id}`)
@@ -433,6 +416,10 @@ function enviarAvaliacao() {
     }
   });
 }
+    function goBack() {
+      // Volta para a página anterior no histórico do navegador
+      window.history.back(); 
+    }
 
 </script>
 
