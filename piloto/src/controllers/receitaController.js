@@ -18,13 +18,29 @@ exports.createReceita = async (req, res) => {
 // Função de visualizar todas as receitas
 exports.getAllReceita = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT r.*, f.nome AS cozinheiro,f.idFuncionario AS FKcozinheiro,f.nome_fantasia,cat.nome AS nome_categoria,TO_BASE64(fr.foto) AS fotoBase64 FROM Receita r JOIN Funcionario f ON r.cozinheiro = f.idFuncionario JOIN Categoria cat ON r.FKcategoria = cat.idCategoria LEFT JOIN Foto_Receita fr ON fr.FKidReceita = r.idReceita');
+    const [rows] = await pool.query(`
+      SELECT 
+        r.*, 
+        f.nome AS cozinheiro,
+        f.idFuncionario AS FKcozinheiro,
+        f.nome_fantasia,
+        cat.nome AS nome_categoria,
+        deg.nota_degustacao AS nota,
+        TO_BASE64(fr.foto) AS fotoBase64
+      FROM Receita r
+      JOIN Funcionario f ON r.cozinheiro = f.idFuncionario
+      JOIN Categoria cat ON r.FKcategoria = cat.idCategoria
+      LEFT JOIN Foto_Receita fr ON fr.FKidReceita = r.idReceita
+      LEFT JOIN Degustacao deg 
+        ON deg.FKnome_rct = r.nome_rct AND deg.FKcozinheiro = r.cozinheiro
+    `);
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao buscar receitas' });
   }
 };
+
 
 // Função de buscar receita por ID
 exports.getReceitaById = async (req, res) => {
@@ -39,11 +55,13 @@ exports.getReceitaById = async (req, res) => {
         f.idFuncionario AS FKcozinheiro,
         f.nome_fantasia,
         cat.nome AS nome_categoria,
+        deg.nota_degustacao as nota,
         TO_BASE64(fr.foto) AS fotoBase64
       FROM Receita r
       JOIN Funcionario f ON r.cozinheiro = f.idFuncionario
       JOIN Categoria cat ON r.FKcategoria = cat.idCategoria
       LEFT JOIN Foto_Receita fr ON fr.FKidReceita = r.idReceita
+      LEFT JOIN Degustacao deg ON deg.FKnome_rct = r.nome_rct AND deg.FKcozinheiro = r.cozinheiro
       WHERE r.idReceita = ?
     `;
 

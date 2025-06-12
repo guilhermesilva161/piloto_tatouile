@@ -315,6 +315,7 @@ function visualizarReceita(id) {
             : '<li>Sem ingredientes cadastrados</li>'}
           </ul><br><br>
         <p><strong>Modo de preparo:</strong> ${r.preparo}</p><br>
+        <p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br>
 
 
         <button onclick="fecharVisualizacao()">Fechar</button>
@@ -382,6 +383,14 @@ function renderizarEstrelas() {
   }
 }
 
+function exibirEstrelas(nota) {
+  let html = "";
+  for (let i = 1; i <= 5; i++) {
+    const classe = nota >= i ? "cheia" : (nota >= i - 0.5 ? "meia" : "");
+    html += `<span class="estrela ${classe}">★</span>`;
+  }
+  return html;
+}
 function enviarAvaliacao() {
   const nome_rct = document.getElementById("FKnome_rct").value;
   const cozinheiro= document.getElementById("FKcozinheiro").value;

@@ -273,10 +273,7 @@ span.estrela.cheia {
     <nav>
     <button class="back-button" onclick="goBack()">&#x2190;</button> 
     <a href="#receitas_adm" class="active">Receitas</a>
-    <a href="categoria.html">Categorias</a>
-    <a href="funcionario.html">Funcionários</a>
-    <a href="cargos.html">Cargos</a>
-    <a href="restaurante.html">Restaurantes</a>
+    <a href="publicacao.html">Publicação</a>
   </nav>
 
     <div class="search-container">
@@ -395,7 +392,7 @@ function visualizarReceita(id) {
             : '<li>Sem ingredientes cadastrados</li>'}
           </ul><br><br>
         <p><strong>Modo de preparo:</strong> ${r.preparo}</p><br>
-        <p><strong>Nota Degustação: </strong>${exibirEstrelas(r.nota)}</p><br>
+        <p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br>
 
 
         <button onclick="fecharVisualizacao()">Fechar</button>
@@ -426,13 +423,6 @@ function visualizarReceita(id) {
     .catch(err => alert('Erro ao carregar receita para visualização: ' + err));
 }
 
-function fecharVisualizacao() {
-  carregarReceitas();
-  const modal = document.getElementById('modalVisualizacao');
-  if (modal) modal.style.display = 'none';
-    document.getElementById('paginaTabela').classList.remove('hidden');
-    
-}
 
 function exibirEstrelas(nota) {
   let html = "";
@@ -449,6 +439,15 @@ function exibirEstrelas(nota) {
   }
 
   return html;
+}
+
+
+function fecharVisualizacao() {
+  carregarReceitas();
+  const modal = document.getElementById('modalVisualizacao');
+  if (modal) modal.style.display = 'none';
+    document.getElementById('paginaTabela').classList.remove('hidden');
+    
 }
 
   carregarReceitas();
