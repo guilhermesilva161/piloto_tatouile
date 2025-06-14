@@ -252,8 +252,8 @@
             <td>${medida.idMedida}</td>
             <td>${medida.descricao}</td>
             <td>
-                <button class="excluir" onclick="excluirMedida(${medida.idMedida})">X</button>
-                <button onclick="editarMedida(${medida.descricao})">Editar</button>
+                <button class="excluir" onclick="excluirMedida('${medida.idMedida}')">X</button>
+                <button onclick="editarMedida('${medida.idMedida}')">Editar</button>
             </td>
           `;
         tbody.appendChild(row);
@@ -294,6 +294,7 @@
 
         document.getElementById('paginaTabela').classList.add('hidden');
         document.getElementById('paginaFormulario').classList.remove('hidden');
+        carregarMedida();
       })
       .catch(error => console.error('Erro ao carregar medida:', error));
   }

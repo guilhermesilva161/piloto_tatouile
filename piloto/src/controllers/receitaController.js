@@ -26,6 +26,7 @@ exports.getAllReceita = async (req, res) => {
         f.nome_fantasia,
         cat.nome AS nome_categoria,
         deg.nota_degustacao AS nota,
+        deg.comentario AS coment,
         TO_BASE64(fr.foto) AS fotoBase64
       FROM Receita r
       JOIN Funcionario f ON r.cozinheiro = f.idFuncionario
@@ -56,6 +57,8 @@ exports.getReceitaById = async (req, res) => {
         f.nome_fantasia,
         cat.nome AS nome_categoria,
         deg.nota_degustacao as nota,
+        deg.comentario AS coment,
+        deg.data_degustacao AS data_deg,
         TO_BASE64(fr.foto) AS fotoBase64
       FROM Receita r
       JOIN Funcionario f ON r.cozinheiro = f.idFuncionario

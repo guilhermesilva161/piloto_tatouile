@@ -6,12 +6,13 @@ exports.salvarDegustacao = async (req, res) => {
     data_degustacao,
     FKnome_rct,
     FKcozinheiro,
-    FKdegustador
+    FKdegustador,
+    comentario
   } = req.body;
     const sql = `
       INSERT INTO Degustacao 
-      (nota_degustacao, data_degustacao, FKnome_rct, FKcozinheiro, FKdegustador)
-      VALUES (?, ?, ?, ?, ?)
+      (nota_degustacao, data_degustacao, FKnome_rct, FKcozinheiro, FKdegustador, comentario)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     await pool.query(sql, [
@@ -19,7 +20,8 @@ exports.salvarDegustacao = async (req, res) => {
       data_degustacao,
       FKnome_rct,
       FKcozinheiro,
-      FKdegustador
+      FKdegustador,
+      comentario
     ]);
 
     return res.status(201).json({ mensagem: 'Avaliação salva com sucesso!' });

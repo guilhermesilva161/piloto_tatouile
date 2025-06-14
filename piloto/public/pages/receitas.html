@@ -145,20 +145,22 @@
       text-align: center;
     }
 
-    .add-button {
-      position: fixed;
-      bottom: 160px;
-      right: 210px;
-      width: 220px;
-      height: 425px;
-      border-radius: 10%;
-      background-color: white;
-      color: black;
-      font-size: 24px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-    }
+.add-button {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: white;
+  color: black;
+  font-size: 30px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
 
     form input {
       width: 80%;
@@ -215,11 +217,13 @@
 }
 
 .galeria-receitas {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, auto));
   gap: 20px;
   justify-content: center;
+  place-items: center; /* NOVO: centraliza cada item */
   margin-top: 20px;
+  padding: 0 40px;
 }
 
 .card-receita {
@@ -263,6 +267,8 @@
   cursor: pointer;
 }
 #formularioFoto {
+  width: 1600px;
+  height: 650px;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -279,11 +285,20 @@
 #formularioFoto.show {
   display: block;
 }
+p.comentario {
+  width: 750px;
+  height: 200px;
+  overflow: auto;           /* Adiciona rolagem se o texto ultrapassar */
+  word-wrap: break-word;    /* Quebra palavras longas */
+  white-space: pre-wrap;    /* Mantém quebras de linha do texto */
+  padding: 10px;            /* Espaço interno para melhor visualização */
+  box-sizing: border-box;   /* Garante que padding não estoure o tamanho */
+}
   </style>
 </head>
 <body>
     <nav>
-    <button class="back-button" onclick="goBack()">&#x2190;</button> 
+    <button class="back-button"><a href="home_chefe.html">&#x2190;</a></button> 
     <a href="#receitas" class="active">Receitas</a>
     <a href="medidas.html">Medidas</a>
     <a href="ingredientes.html">Ingredientes</a>
@@ -313,7 +328,7 @@
 <div id="paginaTabela">
   <h1 class="center">Receitas:</h1>
   <div id="galeriaReceitas" class="galeria-receitas"></div>
-  <button class="add-button" onclick="mostrarFormularioCriar()">+ <br> Adicionar <br>Receita </button>
+  <button class="add-button" onclick="mostrarFormularioCriar()">+ </button>
 </div>
 
 
@@ -358,9 +373,11 @@
 
   <label>Descrição:</label>
   <input type="text" name="descricao" required>
-
+  <br>
+  <br>
   <label>Foto da Receita:</label>
   <input type="file" name="foto" accept="image/*" required>
+  <br>
 
   <button type="submit">Enviar Foto</button>
   <button type="button" onclick="fecharFormularioFoto()">Cancelar</button>
@@ -446,6 +463,17 @@ function adicionarFoto(idReceita) {
   const form = document.getElementById('formFoto');
   form.dataset.idReceita = idReceita;
 }
+
+function fecharFormularioFoto() {
+  const divForm = document.getElementById('formularioFoto');
+  divForm.classList.remove('show');
+  divForm.classList.add('hidden');
+
+  const form = document.getElementById('formFoto');
+  form.reset(); // limpa os campos
+  delete form.dataset.idReceita; // remove o idReceita armazenado
+}
+
 
 function editarReceita(id) {
   fetch(`/api/receita/${id}`)
@@ -693,6 +721,7 @@ function visualizarReceita(id) {
         return `${dia}/${mes}/${ano}`;
       }
       const dataFormatada = formatarData(r.dt_criacao);
+      const dataFormatadaDeg = formatarData(r.data_deg);
 
       
       // Mostrar os dados em texto (sem input)
@@ -712,6 +741,8 @@ function visualizarReceita(id) {
             : '<li>Sem ingredientes cadastrados</li>'}
           </ul><br><br>
         <p><strong>Modo de preparo:</strong> ${r.preparo}</p><br>
+                ${!r.nota ? '<p>Sem Avaliação<p/>' 
+          :`<p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br>`}
 
 
         <button onclick="fecharVisualizacao()">Fechar</button>
@@ -863,11 +894,9 @@ document.getElementById('formReceita2').addEventListener('submit', async functio
 
     const data = await response.json();
     alert(data.message);
+    carregarReceitas();
   });
-      function goBack() {
-      // Volta para a página anterior no histórico do navegador
-      window.history.back(); 
-    }
+
 </script>
 
 </body>

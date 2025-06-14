@@ -211,12 +211,15 @@
 .ingrediente-group button:hover {
   background-color: #cc0000;
 }
+
 .galeria-receitas {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, auto));
   gap: 20px;
   justify-content: center;
+  place-items: center; /* NOVO: centraliza cada item */
   margin-top: 20px;
+  padding: 0 40px;
 }
 
 .card-receita {
@@ -266,12 +269,21 @@ span.estrela {
 span.estrela.cheia {
   color: gold;
 }
+p.comentario {
+  width: 750px;
+  height: 200px;
+  overflow: auto;           /* Adiciona rolagem se o texto ultrapassar */
+  word-wrap: break-word;    /* Quebra palavras longas */
+  white-space: pre-wrap;    /* Mantém quebras de linha do texto */
+  padding: 10px;            /* Espaço interno para melhor visualização */
+  box-sizing: border-box;   /* Garante que padding não estoure o tamanho */
+}
 
   </style>
 </head>
 <body>
     <nav>
-    <button class="back-button" onclick="goBack()">&#x2190;</button> 
+    <button class="back-button"><a href="home_adm.html">&#x2190;</a></button> 
     <a href="#receitas_adm" class="active">Receitas</a>
     <a href="categoria.html">Categorias</a>
     <a href="funcionario.html">Funcionários</a>
@@ -376,6 +388,7 @@ function visualizarReceita(id) {
         return `${dia}/${mes}/${ano}`;
       }
       const dataFormatada = formatarData(r.dt_criacao);
+      const dataFormatadaDeg = formatarData(r.data_deg);
 
       
       // Mostrar os dados em texto (sem input)
@@ -395,8 +408,8 @@ function visualizarReceita(id) {
             : '<li>Sem ingredientes cadastrados</li>'}
           </ul><br><br>
         <p><strong>Modo de preparo:</strong> ${r.preparo}</p><br>
-        <p><strong>Nota Degustação: </strong>${exibirEstrelas(r.nota)}</p><br>
-
+        ${!r.nota ? '<p>Sem Avaliação<p/>' 
+          :`<p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br>`}
 
         <button onclick="fecharVisualizacao()">Fechar</button>
       `;
@@ -452,10 +465,6 @@ function exibirEstrelas(nota) {
 }
 
   carregarReceitas();
-      function goBack() {
-      // Volta para a página anterior no histórico do navegador
-      window.history.back(); 
-    }
 </script>
 
 </body>

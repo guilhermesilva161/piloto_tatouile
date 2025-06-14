@@ -149,11 +149,13 @@
 
 
 .galeria-receitas {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, auto));
   gap: 20px;
   justify-content: center;
+  place-items: center; /* NOVO: centraliza cada item */
   margin-top: 20px;
+  padding: 0 40px;
 }
 
 .card-receita {
@@ -204,10 +206,18 @@
   background: #000937;
   padding: 20px;
   z-index: 1000;
-  width:1250px;
+  width: 1250px;
   height: 800px;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#avaliacaoForm{
+  display: none;
+
 }
 .estrelas span {
   font-size: 30px;
@@ -218,26 +228,44 @@
   color: gold;
 }
 
+span.estrela {
+  font-size: 24px;
+  color: lightgray;
+}
+span.estrela.cheia {
+  color: gold;
+}
+
+p.comentario {
+  width: 750px;
+  height: 200px;
+  overflow: auto;           /* Adiciona rolagem se o texto ultrapassar */
+  word-wrap: break-word;    /* Quebra palavras longas */
+  white-space: pre-wrap;    /* Mantém quebras de linha do texto */
+  padding: 10px;            /* Espaço interno para melhor visualização */
+  box-sizing: border-box;   /* Garante que padding não estoure o tamanho */
+}
   </style>
 </head>
 <body>
 
   <nav>
-    <button class="back-button" onclick="goBack()">&#x2190;</button> 
+    <button class="back-button"><a href="home_degustador.html">&#x2190;</a></button> 
     <a href="degustacao.html">Degustação</a>
   </nav>
 
 
-  <div id="avaliacaoForm" style="display: none;" class="avaliacao-popup">
+  <div id="avaliacaoForm" class="avaliacao-popup">
   <h3>Avaliar Receita</h3>
-  <div id="estrelas" class="estrelas"></div>
-  <input type="date" placeholder="Data" id="data_degustacao">
-  <input type="text" placeholder="Nome Receita" id="FKnome_rct">
-  <input type="number" placeholder="Cozinheiro" id="FKcozinheiro">
-  <input type="number" placeholder="Degustador" id="FKdegustador">
+  <input type="text" placeholder="cozinheiro" id="FKcozinheiro" class="hidden">
+  <input type="text" placeholder="nomerct" id="FKnome_rct" class="hidden">
+  <div id="estrelas" class="estrelas"></div> <br>
+  <textarea placeholder="Comentário" id="comentario" rows="5"></textarea><br>
+  <input type="date" placeholder="Data" id="data_degustacao"><br>
+  <input type="number" placeholder="Degustador" id="FKdegustador"><br>
   <button onclick="enviarAvaliacao()">Enviar</button>
   <button onclick="fecharAvaliacao()">Cancelar</button>
-</div>
+  </div>
 
 <!-- Botão para abrir o formulário -->
 <div class="center">
@@ -254,10 +282,38 @@
 
 <script>
 
+function renderizarEstrelas() {
+  const container = document.getElementById("estrelas");
+  container.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const estrela = document.createElement("span");
+    estrela.innerHTML = "★";
+    estrela.classList.toggle("selecionada", i <= notaSelecionada);
+    estrela.onclick = () => {
+      notaSelecionada = i;
+      renderizarEstrelas();
+    };
+    container.appendChild(estrela);
+  }
+}
+
+function exibirEstrelas(nota) {
+  let html = "";
+  for (let i = 1; i <= 5; i++) {
+    const classe = nota >= i ? "cheia" : (nota >= i - 0.5 ? "meia" : "");
+    html += `<span class="estrela ${classe}">★</span>`;
+  }
+  return html;
+}
+  
+
+let todasReceitas = [];
+
 function carregarReceitas() {
   fetch('/api/receita')
     .then(res => res.json())
     .then(data => {
+      todasReceitas = data;
       const galeria = document.getElementById('galeriaReceitas');
       galeria.innerHTML = ''; // limpa os cards anteriores
 
@@ -276,7 +332,7 @@ function carregarReceitas() {
           <h3>${r.nome_rct}</h3>
           <p>Chefe: ${r.cozinheiro}</p>
           <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
-          <button onclick="avaliarReceita(${r.idReceita})">Avaliar</button>
+          ${r.nota != null ? `<p>${exibirEstrelas(r.nota)}</p>` : `<button onclick="avaliarReceita(${r.idReceita})"><span class="estrela">★</span></button>`}
         `;
 
         galeria.appendChild(card);
@@ -296,7 +352,7 @@ function visualizarReceita(id) {
         return `${dia}/${mes}/${ano}`;
       }
       const dataFormatada = formatarData(r.dt_criacao);
-
+      const dataFormatadaDeg = formatarData(r.data_deg);
       
       // Mostrar os dados em texto (sem input)
       const html = `
@@ -315,7 +371,10 @@ function visualizarReceita(id) {
             : '<li>Sem ingredientes cadastrados</li>'}
           </ul><br><br>
         <p><strong>Modo de preparo:</strong> ${r.preparo}</p><br>
-        <p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br>
+        ${!r.nota ? '<p>Sem Avaliação<p/>' 
+          :`<p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br>`}
+
+        
 
 
         <button onclick="fecharVisualizacao()">Fechar</button>
@@ -360,9 +419,17 @@ function avaliarReceita(id) {
   idReceitaSelecionada = id;
   notaSelecionada = 0;
 
-  document.getElementById("avaliacaoForm").style.display = "block";
+  const receita = todasReceitas.find(r => r.idReceita === id);
+  if (receita) {
+    // Preenche os dados no formulário de avaliação
+    document.getElementById("FKcozinheiro").value = receita.FKcozinheiro;
+    document.getElementById("FKnome_rct").value = receita.nome_rct;
+
+  }
+  document.getElementById("avaliacaoForm").style.display = "flex";
   renderizarEstrelas();
 }
+
 
 function fecharAvaliacao() {
   document.getElementById("avaliacaoForm").style.display = "none";
@@ -396,7 +463,9 @@ function enviarAvaliacao() {
   const cozinheiro= document.getElementById("FKcozinheiro").value;
   const degustador = document.getElementById("FKdegustador").value;
   const data = document.getElementById("data_degustacao").value;
+  const comentario = document.getElementById("comentario").value;
 
+  
   if (notaSelecionada === 0) {
     alert("Selecione uma nota de 1 a 5 estrelas.");
     return;
@@ -408,7 +477,8 @@ function enviarAvaliacao() {
     FKnome_rct:nome_rct,
     FKcozinheiro:cozinheiro,
     FKdegustador:degustador,
-    data_degustacao:data
+    data_degustacao:data,
+    comentario:comentario
   };
 
   fetch("/api/degustacao", {
@@ -423,13 +493,10 @@ function enviarAvaliacao() {
     } else {
       alert("Erro ao enviar avaliação.");
     }
+    carregarReceitas()
   });
 }
-    function goBack() {
-      // Volta para a página anterior no histórico do navegador
-      window.history.back(); 
-    }
-
+carregarReceitas()
 </script>
 
 </body>

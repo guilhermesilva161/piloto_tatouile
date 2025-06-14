@@ -205,6 +205,7 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Degustacao` (
   `idDegustacao` INT NOT NULL AUTO_INCREMENT COMMENT 'Contém a identificação única da degustação.\n\n',
   `nota_degustacao` DECIMAL(3,1) NOT NULL COMMENT 'Contém a nota da degustação.\n',
   `data_degustacao` DATE NOT NULL COMMENT 'Data da degustação\n\n\n',
+  `comentario` VARCHAR(1000) NOT NULL COMMENT 'Comentario',
   `FKnome_rct` VARCHAR(50) NOT NULL COMMENT 'Chave estrangeira da receita',
   `FKcozinheiro` INT NOT NULL COMMENT 'Chave estrangeira do cozinheiro',
   `FKdegustador` INT NOT NULL COMMENT 'Chave estrangeira do degustador',
@@ -214,12 +215,12 @@ CREATE TABLE IF NOT EXISTS `AcervoRct`.`Degustacao` (
   CONSTRAINT `fk_Degustacao_Receita1`
     FOREIGN KEY (`FKnome_rct` , `FKcozinheiro`)
     REFERENCES `AcervoRct`.`Receita` (`nome_rct` , `cozinheiro`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_Degustacao_Funcionario1`
     FOREIGN KEY (`FKdegustador`)
     REFERENCES `AcervoRct`.`Funcionario` (`idFuncionario`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
