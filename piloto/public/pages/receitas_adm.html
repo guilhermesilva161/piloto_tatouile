@@ -270,8 +270,8 @@ span.estrela.cheia {
   color: gold;
 }
 p.comentario {
-  width: 750px;
-  height: 200px;
+  max-width: 750px;
+  max-height: 200px;
   overflow: auto;           /* Adiciona rolagem se o texto ultrapassar */
   word-wrap: break-word;    /* Quebra palavras longas */
   white-space: pre-wrap;    /* Mantém quebras de linha do texto */
@@ -283,12 +283,12 @@ p.comentario {
 </head>
 <body>
     <nav>
-    <button class="back-button"><a href="home_adm.html">&#x2190;</a></button> 
+    <button class="back-button"><a href="/api/dashboard-adm">&#x2190;</a></button> 
     <a href="#receitas_adm" class="active">Receitas</a>
-    <a href="categoria.html">Categorias</a>
-    <a href="funcionario.html">Funcionários</a>
-    <a href="cargos.html">Cargos</a>
-    <a href="restaurante.html">Restaurantes</a>
+    <a href="/api/dashboard-categorias">Categorias</a>
+    <a href="/api/dashboard-funcionarios">Funcionários</a>
+    <a href="/api/dashboard-cargos">Cargos</a>
+    <a href="/api/dashboard-restaurante">Restaurantes</a>
   </nav>
 
     <div class="search-container">

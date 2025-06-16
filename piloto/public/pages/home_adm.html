@@ -1,27 +1,277 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Administrador</title>
-  <link rel="stylesheet" href="../css/style.css">
+    <meta charset="UTF-8">
+    <title>Administrador</title>
+    <style>
+        /* Reset básico e box-sizing */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Estilos do corpo da página */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif; /* Preferindo Poppins como fonte principal */
+            background-color: #030b3d; /* Azul bem escuro consistente */
+            color: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Estilo para elementos somente para leitores de tela (SR-only) */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            border: 0;
+        }
+
+        /* Contêiner principal do layout flexível */
+        .container {
+            display: flex;
+            flex-direction: row; /* Coloca os painéis lado a lado por padrão */
+            min-height: 100vh;
+            /* max-width: 1440px; removido para permitir que ocupe a tela toda */
+            margin: 0 auto;
+            overflow: hidden;
+            position: relative; /* Base para o posicionamento absoluto da Torre Eiffel */
+        }
+
+        /* Painel Esquerdo (para a logo do Remy) */
+        .left-panel {
+            flex: 1.5; /* Ajuste para dar mais espaço ao painel esquerdo */
+            background-color: transparent; /* Permite ver a Torre Eiffel por baixo */
+            display: flex;
+            flex-direction: column; /* Organiza o conteúdo verticalmente */
+            justify-content: center; /* Centraliza verticalmente o conteúdo (logo-area) */
+            align-items: center; /* Centraliza horizontalmente o conteúdo (logo-area) */
+            padding: 32px 16px;
+            min-height: 100vh; /* Garante que o painel ocupe a altura total */
+            z-index: 10; /* Garante que o painel e seu conteúdo fiquem acima da torre */
+        }
+
+        /* Imagem da Torre Eiffel (posicionada globalmente) */
+        .eiffel-image { /* Renomeada de .eiffel para evitar conflito e ser mais descritiva */
+            position: absolute;
+            bottom: 0;
+            height: 100%; /* Ocupa a altura total do .container */
+            max-width: 100%; /* Garante que não estique demais horizontalmente */
+            left: 0; /* Alinha à esquerda do container */
+            object-fit: contain; /* Mantém a proporção da imagem */
+            filter: brightness(90%);
+            user-select: none;
+            z-index: 1; /* Fica atrás dos painéis */
+        }
+
+        /* Área da Logo (Remy e Bem-vindo Chefe) */
+        .logo-area {
+            text-align: center; /* Centraliza o conteúdo inline/texto */
+            /* Margens controladas pelo Flexbox do .left-panel */
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        .remy {
+            width: 300px; /* Tamanho padrão do Remy */
+            height: auto; /* Mantém a proporção */
+            object-fit: contain;
+            user-select: none;
+            margin-bottom: 16px;
+            /* Não é necessário display: block; margin: auto; aqui, pois o align-items do .left-panel já centraliza o .logo-area */
+        }
+
+        /* Título principal "Bem-vindo Chefe!" */
+        .bemvindo { /* Classe para o h1 */
+            font-weight: 400;
+            font-size: clamp(1.8rem, 3vw, 2.8rem); /* Tamanho de fonte responsivo */
+            line-height: 1.2;
+            text-align: center;
+            margin: 0; /* Remove margens padrão do h1 */
+            user-select: none;
+            color: #fff; /* Garante a cor branca para o texto principal */
+        }
+
+        .bemvindo strong, .bemvindo span { /* Para o 'Chefe!' */
+            font-weight: 700;
+            display: block;
+            margin-top: 8px;
+        }
+
+        /* Painel Direito (com os botões de menu) */
+        .right-panel {
+            flex: 1;
+            background-color: #060e57; /* Tom azul mais intenso */
+            border-top-left-radius: 24px;
+            border-bottom-left-radius: 24px;
+            box-shadow: inset 4px 0 15px rgba(0, 0, 0, 0.5);
+            padding: 64px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centraliza os botões verticalmente */
+            align-items: center; /* Centraliza os botões horizontalmente */
+            gap: 24px; /* Espaçamento entre os botões */
+            min-width: 300px;
+            max-width: 600px; /* Limita a largura máxima para não ficar muito esticado */
+            width: 40%; /* Sugere uma largura base em telas maiores */
+            z-index: 10; /* Garante que o painel e seus botões fiquem acima da torre */
+        }
+
+        /* Menu de botões */
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 24px; /* Espaçamento entre os botões */
+        }
+
+        .menu-button { /* Consolidado para .menu-button */
+            width: 80%; /* Ocupa mais espaço dentro do painel direito */
+            min-height: 72px;
+            background-color: #020e3b;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            padding: 16px 24px;
+            font-size: clamp(1rem, 1.5vw, 1.3rem); /* Tamanho de fonte responsivo */
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Separa texto e ícone */
+            transition: border-color 0.3s ease,
+                        background-color 0.3s ease,
+                        box-shadow 0.3s ease,
+                        transform 0.2s ease;
+            box-shadow: -20px 0 16px rgba(100, 160, 255, 0.4);
+            margin: 0 auto; /* Centraliza o botão dentro do right-panel */
+        }
+
+        .menu-button:hover,
+        .menu-button:focus-visible {
+            background-color: #1e2f73;
+            border-color: #3e84ff;
+            transform: translateY(-3px);
+            box-shadow: -12px 0 24px rgba(100, 160, 255, 0.6),
+                        0 6px 20px rgba(62, 132, 255, 0.3);
+        }
+
+        .icon-circle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            overflow: hidden;
+        }
+
+        .icon-circle img {
+            width: 25px; /* Ajuste o tamanho para caber dentro do círculo */
+            height: 25px;
+            object-fit: contain;
+            user-select: none;
+            pointer-events: none; /* Para que o clique no botão não seja bloqueado pelo ícone */
+        }
+
+        /* Estilos adicionais que estavam no segundo bloco (revistos e incorporados) */
+        /* O estilo 'h1' e '.bemvindo' foram unificados, preferindo o mais flexível com 'clamp()' */
+        /* 'logo-wrapper' e 'logo-img', 'logo-text', 'stars' foram mantidos dos seus estilos originais
+           se não foram substituídos explicitamente pelos novos elementos como '.remy' e '.bemvindo' */
+
+        /* Media Query para telas menores (responsividade) */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* Empilha os painéis em telas menores */
+            }
+
+            .right-panel {
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+                border-top-right-radius: 24px; /* Adiciona border-radius na parte superior direita */
+                box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5); /* Ajusta a sombra para cima */
+                max-width: 100%; /* Ocupa 100% da largura em telas pequenas */
+                padding: 32px 24px; /* Reduz o padding */
+            }
+
+            .left-panel {
+                padding: 24px 16px;
+                background-color: #030b3d; /* Garante o fundo original em telas pequenas */
+                /* Centraliza a logo no topo do painel esquerdo quando empilhado */
+                justify-content: center; 
+                align-items: center;
+            }
+
+            .remy {
+                width: 200px; /* Reduz o tamanho do Remy em telas menores */
+                height: 200px;
+            }
+
+            .menu-button {
+                width: 95%; /* Ocupa quase toda a largura em telas pequenas */
+            }
+
+            /* Em telas pequenas, a torre Eiffel deve voltar ao fluxo normal para não sobrepor */
+            .eiffel-image {
+                position: relative; /* Volta ao fluxo normal do documento */
+                height: auto; /* Altura automática para se ajustar */
+                width: 100%; /* Ocupa a largura total do container */
+                margin: 20px auto; /* Adiciona margem vertical e centraliza */
+                object-fit: contain; /* Mantém a proporção */
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="left-panel">
-      <img src="../imagens/torre.png" alt="Torre Eiffel" class="eiffel">
-      <div class="logo-area">
-        <img src="../imagens/tatouille.png" alt="Remy" class="remy">
-        <h1 class="bemvindo">B e m - v i n d o<br><span>A d m i n i s t r a d o r!</span></h1>
-      </div>
+    <div class="container">
+        <img src="../imagens/torre.png" alt="Torre Eiffel" class="eiffel-image">
+
+        <div class="left-panel">
+            <div class="logo-area">
+                <img src="../imagens/tatouille.png" alt="Remy" class="remy">
+                <h1 class="bemvindo">B e m - v i n d o<br><span>A d m i n i s t r a d o r!</span></h1>
+            </div>
+        </div>
+        <div class="right-panel">
+
+            <button class="menu-button" onclick="window.location.href='/api/dashboard-receitas'">Receitas<span class="icon-circle"><img src="../imagens/icone_receitas.png" alt="Ícone Receitas"></span>
+            </button>
+
+            <button class="menu-button" onclick="window.location.href='/api/dashboard-categorias'">Categorias<span class="icon-circle"><img src="../imagens/icone_categorias.png" alt="Ícone Categorias"></span>
+            </button>
+
+            <button class="menu-button" onclick="window.location.href='/api/dashboard-funcionarios'">Funcionários<span class="icon-circle"><img src="../imagens/icone_funcionarios.png" alt="Ícone Funcionários"></span>
+            </button>
+
+            <button class="menu-button" onclick="window.location.href='/api/dashboard-cargos'"> Cargos<span class="icon-circle"><img src="../imagens/icone_cargos.png" alt="Ícone Cargos"></span>
+            </button>
+
+            <button class="menu-button" onclick="window.location.href='/api/dashboard-restaurante'">Restaurante<span class="icon-circle"><img src="../imagens/icone_restaurante.png" alt="Ícone Restaurante"></span>
+            </button>
+        </div>
     </div>
-    <div class="right-panel">
-      <button class="menu-button" onclick="window.location.href='receitas_adm.html'">Receitas</button>
-      <button class="menu-button" onclick="window.location.href='categoria.html'">Categorias</button>
-      <button class="menu-button" onclick="window.location.href='funcionario.html'">Funcionários</button>
-      <button class="menu-button" onclick="window.location.href='cargos.html'">Cargos</button>
-      <button class="menu-button" onclick="window.location.href='restaurante.html'">Restaurante</button>
-    </div>
-  </div>
+    <script>
+        function fazerLogout() {
+            fetch('/api/logout', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Você foi desconectado.');
+                        window.location.href = '/'; // Redireciona para a página de login
+                    } else {
+                        alert('Erro ao fazer logout.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro de rede no logout:', error);
+                    alert('Erro na comunicação com o servidor.');
+                });
+        }
+    </script>
 </body>
 </html>
+
+

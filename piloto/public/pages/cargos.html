@@ -168,12 +168,12 @@
 </head>
 <body>
     <nav>
-    <button class="back-button" onclick="goBack()">&#x2190;</button> 
-    <a href="receitas.html">Receitas</a>
-    <a href="categoria.html">Categorias</a>
-    <a href="funcionario.html">Funcionários</a>
-    <a href="#cargos" class="active">Cargos</a>
-    <a href="restaurante.html">Restaurantes</a>
+    <button class="back-button"><a href="/api/dashboard-adm">&#x2190;</a></button> 
+    <a href="/api/dashboard-receitas">Receitas</a>
+    <a href="/api/dashboard-categorias">Categorias</a>
+    <a href="/api/dashboard-funcionarios">Funcionários</a>
+    <a href="#cargos"  class="active">Cargos</a>
+    <a href="/api/dashboard-restaurante">Restaurantes</a>
   </nav>
 
   <!-- Página da Tabela -->
@@ -235,6 +235,57 @@
   </div>
 
   <script>
+     async function verificarAcessoEObterConteudo() {
+            const token = localStorage.getItem('jwtToken');
+
+            if (!token) {
+                alert('Você não está logado. Redirecionando para a página de login.');
+                // Note o caminho: se seu index.html está em public/pages, o caminho relativo pode ser '../pages/index.html'
+                // Ou o caminho absoluto que você usa no servidor para servir a página de login.
+                window.location.href = '/'; // Redireciona para a raiz que serve o index.html
+                return;
+            }
+
+            try {
+                // Faça uma requisição para a própria rota que serviu esta página.
+                // Isso faz o backend re-verificar o token e a permissão.
+                const response = await fetch(window.location.pathname, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(errorData.erro || 'Erro de acesso. Redirecionando para login.');
+                    localStorage.removeItem('jwtToken'); // Remove o token inválido/expirado
+                    window.location.href = '/'; // Redireciona para a página de login
+                    return;
+                }
+
+                console.log('Acesso concedido. Página carregada com sucesso.');
+                // Se sua página precisar carregar dados específicos do usuário/cargo,
+                // você faria uma nova requisição API aqui (ex: fetch('/api/admin-data', { headers: ... }))
+                // e usaria esses dados para popular a página.
+
+            } catch (error) {
+                console.error('Erro ao verificar acesso:', error);
+                alert('Erro na comunicação com o servidor. Redirecionando para login.');
+                localStorage.removeItem('jwtToken');
+                window.location.href = '/'; // Redireciona para a página de login
+            }
+        }
+
+        // Chame esta função assim que a página protegida for carregada
+        document.addEventListener('DOMContentLoaded', verificarAcessoEObterConteudo);
+
+        // Função de logout para remover o token
+        function fazerLogout() {
+            localStorage.removeItem('jwtToken');
+            alert('Você foi desconectado.');
+            window.location.href = '/'; // Redireciona para a página de login
+        }
 
   let modoEdicao = false;
 

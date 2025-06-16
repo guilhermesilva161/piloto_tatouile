@@ -74,25 +74,30 @@
     }
 
     .search-container {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-      gap: 10px;
+      position: relative;
+      width: 400px; /* tamanho menor */
+      margin: 0 auto;
     }
 
     .search-container input {
-      flex: 1;
-      padding: 10px;
+      width: 100%;
+      padding: 10px 40px 10px 15px; /* espaço para a lupa no lado direito */
       border-radius: 8px;
       border: none;
       font-size: 16px;
     }
 
-    .search-container img {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
+    .search-container .icon-lupa {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+      fill: #888;
     }
+
 
     table {
       width: 100%;
@@ -237,8 +242,8 @@ span.estrela.cheia {
 }
 
 p.comentario {
-  width: 750px;
-  height: 200px;
+  max-width: 750px;
+  max-height: 200px;
   overflow: auto;           /* Adiciona rolagem se o texto ultrapassar */
   word-wrap: break-word;    /* Quebra palavras longas */
   white-space: pre-wrap;    /* Mantém quebras de linha do texto */
@@ -250,10 +255,29 @@ p.comentario {
 <body>
 
   <nav>
-    <button class="back-button"><a href="home_degustador.html">&#x2190;</a></button> 
-    <a href="degustacao.html">Degustação</a>
+    <button class="back-button"><a href="/api/dashboard-degustador">&#x2190;</a></button> 
+    <a href="/api/dashboard-degustacao">Degustação</a>
   </nav>
 
+  
+    <div class="search-container">
+      <input
+        type="text"
+        id="filtroNome"
+        placeholder="Pesquisar Receita / Cozinheiro / Categoria"
+      />
+      <svg
+        class="icon-lupa"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"
+        />
+      </svg>
+    </div>
 
   <div id="avaliacaoForm" class="avaliacao-popup">
   <h3>Avaliar Receita</h3>
@@ -314,32 +338,52 @@ function carregarReceitas() {
     .then(res => res.json())
     .then(data => {
       todasReceitas = data;
-      const galeria = document.getElementById('galeriaReceitas');
-      galeria.innerHTML = ''; // limpa os cards anteriores
-
-      data.forEach(r => {
-        const card = document.createElement('div');
-        card.classList.add('card-receita');
-
-        const foto = r.fotoBase64
-          ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome_rct}" />`
-          : `<div style="width: 180px; height: 180px; display:flex; align-items:center; justify-content:center; background-color:#999; border-radius:10px;">
-              <span>Sem foto</span></button>
-             </div>`;
-
-        card.innerHTML = `
-          ${foto}
-          <h3>${r.nome_rct}</h3>
-          <p>Chefe: ${r.cozinheiro}</p>
-          <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
-          ${r.nota != null ? `<p>${exibirEstrelas(r.nota)}</p>` : `<button onclick="avaliarReceita(${r.idReceita})"><span class="estrela">★</span></button>`}
-        `;
-
-        galeria.appendChild(card);
-      });
+      mostrarReceitas(data);
     })
     .catch(err => console.error('Erro ao carregar receitas:', err));
 }
+
+function mostrarReceitas(receitas) {
+  const galeria = document.getElementById('galeriaReceitas');
+  galeria.innerHTML = ''; // limpa os cards anteriores
+
+  receitas.forEach(r => {
+    const card = document.createElement('div');
+    card.classList.add('card-receita');
+
+    const foto = r.fotoBase64
+      ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome_rct}" />`
+      : `<div style="width: 180px; height: 180px; display:flex; align-items:center; justify-content:center; background-color:#999; border-radius:10px;">
+          <span>Sem foto</span>
+         </div>`;
+
+    card.innerHTML = `
+      ${foto}
+      <h3>${r.nome_rct}</h3>
+      <p>Chefe: ${r.cozinheiro}</p>
+      <p>Categoria: ${r.nome_categoria}</p>
+      ${r.nota != null 
+        ? `<p>${exibirEstrelas(r.nota)}</p>` 
+        : `<button onclick="avaliarReceita(${r.idReceita})"><span class="estrela">★</span></button>`}
+      <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
+    `;
+
+    galeria.appendChild(card);
+  });
+}
+
+// 🎯 Filtro em tempo real
+document.getElementById('filtroNome').addEventListener('input', function () {
+  const termo = this.value.toLowerCase();
+
+  const filtradas = todasReceitas.filter(r =>
+    r.nome_rct.toLowerCase().includes(termo) ||
+    r.cozinheiro.toLowerCase().includes(termo) ||
+    r.nome_categoria.toLowerCase().includes(termo)
+  );
+
+  mostrarReceitas(filtradas);
+});
 
 function visualizarReceita(id) {
   fetch(`/api/receita/${id}`)

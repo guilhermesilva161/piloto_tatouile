@@ -1,46 +1,45 @@
+// middlewares/auth.js
+const jwt = require('jsonwebtoken');
 
+const JWT_SECRET = 'security_key';
 
-function protegerRota(req, res, next) {
-  console.log('Sessão atual:', req.session);
-  if (!req.session.usuario) {
-    return res.status(401).json({ mensagem: 'Usuário não autenticado' });
+function verificarToken(req, res, next) {
+    // Busca o token do cookie (req.cookies.jwt)
+    const token = req.cookies.jwt;
 
-  }
-  next();
-}
-
-function autorizarCargo(cargoPermitido) {
-  return (req, res, next) => {
-    if (req.session.usuario && req.session.usuario.cargo === cargoPermitido) {
-      next();
-    } else {
-      res.status(403).json({ mensagem: 'Acesso negado: cargo não autorizado' });
+    if (!token) {
+        // Se o token não for fornecido, redireciona para a página de login
+        return res.redirect('/');
     }
-  };
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.usuario = decoded; // Adiciona as informações do usuário à requisição
+        next(); // Continua
+    } catch (error) {
+        // Se o token for inválido/expirado, redireciona e limpa o cookie (opcional)
+        res.clearCookie('jwt'); // Limpa o cookie inválido
+        return res.redirect('/');
+    }
 }
 
-function authMiddleware(req, res, next) {
-  const token = req.cookies.authToken;  // pegar cookie do token
-  const cargo = req.cookies.userCargo;
-
-  if (!token) {
-    return res.status(401).json({ message: 'Não autenticado' });
-  }
-  if (cargo !== 'adm') {
-    return res.status(403).json({ message: 'Acesso negado' });
-  }
-
-  // opcional: aqui você pode validar o token JWT se usar
-  next();
+function verificarCargo(cargosPermitidos) {
+    return (req, res, next) => {
+        if (!req.usuario || !req.usuario.cargo) {
+            res.clearCookie('jwt'); // Limpa o cookie se houver inconsistência
+            return res.redirect('/');
+        }
+        const userCargo = String(req.usuario.cargo);
+        if (cargosPermitidos.includes(userCargo)) {
+            next();
+        } else {
+            res.clearCookie('jwt'); // Limpa o cookie se o cargo for inválido
+            return res.redirect('/');
+        }
+    };
 }
 
-function requireAuth(req, res, next) {
-  if (req.session && req.session.user) {
-    next(); // usuário autenticado
-  } else {
-    res.redirect('/login'); // ou res.status(403).send('Acesso negado')
-  }
-}
-
-module.exports = { protegerRota, autorizarCargo,authMiddleware,requireAuth };
-
+module.exports = {
+    verificarToken,
+    verificarCargo
+};

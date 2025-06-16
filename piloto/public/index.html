@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Login</title>
+    <style>
+        body{
+            background:url(../imagens/fundo.png);
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="logo">
+            <img src="../imagens/logo.png" alt="logo_tatouille" width="430" height="449">
+        </div>
+        <div class="box">
+            <h1>L o g i n</h1>
+            <form id="loginForm">
+                <label for="email"></label>
+                <input type="text" placeholder="nome:" class="inputs" id="email"> <br> <br>
+                <label for="senha"></label>
+                <input type="password" placeholder="senha:" class="inputs" id="senha"> <br> <br>
+
+                <button type="submit" class="botao">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+         // Seu script no frontend para o formulário de login
+document.getElementById('loginForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const senha = document.getElementById('senha').value;
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, senha })
+            // Não precisa de 'credentials: "include"' aqui, pois cookies são enviados por padrão
+        });
+
+        const data = await response.json(); // A resposta não conterá mais o 'token' diretamente
+
+        if (response.ok) {
+            alert(data.mensagem);
+            // REMOVA: localStorage.setItem('jwtToken', data.token); // O token é definido como cookie pelo backend!
+
+            const cargo = String(data.usuario.cargo);
+
+            // Redireciona para as rotas do BACKEND que servem as páginas HTML PROTEGIDAS
+            // Agora, quando o navegador fizer a requisição para essas URLs, o cookie 'jwt' será enviado AUTOMATICAMENTE.
+            switch (cargo) {
+                case '1':
+                    window.location.href = '/api/dashboard-adm';
+                    break;
+                case '2':
+                    window.location.href = '/api/dashboard-chefe';
+                    break;
+                case '4':
+                    window.location.href = '/api/dashboard-degustador';
+                    break;
+                case '6':
+                    window.location.href = '/api/dashboard-editor';
+                    break;
+                default:
+                    alert('Cargo não reconhecido! Valor recebido: ' + cargo);
+            }
+        } else {
+            alert(data.erro || data.mensagem);
+        }
+    } catch (error) {
+        console.error('Erro ao tentar fazer login:', error);
+        alert('Erro na comunicação com o servidor.');
+    }
+});
+
+// A função fazerLogout() também precisa ser ajustada para remover o cookie
+function fazerLogout() {
+    // Você precisa de uma rota no backend para limpar o cookie de forma segura
+    fetch('/api/logout', { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                alert('Você foi desconectado.');
+                window.location.href = '/'; // Redireciona para a página de login
+            } else {
+                alert('Erro ao fazer logout.');
+            }
+        })
+        .catch(error => {
+            console.error('Erro de rede no logout:', error);
+            alert('Erro na comunicação com o servidor.');
+        });
+}
+    </script>
+
+</body>
+</html>

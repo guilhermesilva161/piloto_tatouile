@@ -285,9 +285,16 @@
 #formularioFoto.show {
   display: block;
 }
+span.estrela {
+  font-size: 24px;
+  color: lightgray;
+}
+span.estrela.cheia {
+  color: gold;
+}
 p.comentario {
-  width: 750px;
-  height: 200px;
+  max-width: 750px;
+  max-height: 200px;
   overflow: auto;           /* Adiciona rolagem se o texto ultrapassar */
   word-wrap: break-word;    /* Quebra palavras longas */
   white-space: pre-wrap;    /* Mantém quebras de linha do texto */
@@ -298,10 +305,10 @@ p.comentario {
 </head>
 <body>
     <nav>
-    <button class="back-button"><a href="home_chefe.html">&#x2190;</a></button> 
+    <button class="back-button"><a href="/api/dashboard-chefe">&#x2190;</a></button> 
     <a href="#receitas" class="active">Receitas</a>
-    <a href="medidas.html">Medidas</a>
-    <a href="ingredientes.html">Ingredientes</a>
+    <a href="/api/dashboard-medidas">Medidas</a>
+    <a href="/api/dashboard-ingredientes">Ingredientes</a>
   </nav>
 
 <div class="search-container">
@@ -707,6 +714,23 @@ function mostrarFormularioCriar() {
     })
     .catch(error => console.error('Erro:', error));
   }
+}
+
+function exibirEstrelas(nota) {
+  let html = "";
+
+  if (nota == null || isNaN(nota)) {
+    // Se não houver nota, exibe 1 estrela cinza ou uma mensagem
+    html = `<span class="estrela sem-nota">★</span>`;
+    return html;
+  }
+
+  for (let i = 1; i <= 5; i++) {
+    const classe = nota >= i ? "cheia" : (nota >= i - 0.5 ? "meia" : "");
+    html += `<span class="estrela ${classe}">★</span>`;
+  }
+
+  return html;
 }
 
 
