@@ -286,7 +286,7 @@ p.comentario {
   <div id="estrelas" class="estrelas"></div> <br>
   <textarea placeholder="Comentário" id="comentario" rows="5"></textarea><br>
   <input type="date" placeholder="Data" id="data_degustacao"><br>
-  <input type="number" placeholder="Degustador" id="FKdegustador"><br>
+  <input type="number" placeholder="Degustador" id="FKdegustador" class="hidden"><br>
   <button onclick="enviarAvaliacao()">Enviar</button>
   <button onclick="fecharAvaliacao()">Cancelar</button>
   </div>
@@ -305,6 +305,43 @@ p.comentario {
 </div>
 
 <script>
+
+ async function preencherDegustadorLogado() {
+        try {
+            // Chama a nova rota no backend. O navegador enviará o cookie JWT automaticamente.
+            const response = await fetch('/api/logged-user-data');
+
+            if (response.ok) {
+                const userData = await response.json();
+                if (userData && userData.id) {
+                    // Preenche o campo FKdegustador com o ID do usuário logado
+                    document.getElementById('FKdegustador').value = userData.id;
+                    console.log('ID do Degustador preenchido automaticamente:', userData.id);
+                } else {
+                    console.error('Dados do usuário não contêm ID válido.');
+                    alert('Não foi possível obter o ID do degustador. Por favor, faça login novamente.');
+                    window.location.href = '/'; // Redireciona se não conseguir o ID
+                }
+            } else {
+                // Se a resposta não for OK (ex: 401 Unauthorized, 403 Forbidden),
+                // o cookie pode ter expirado ou o acesso foi negado.
+                console.error('Falha ao obter dados do usuário:', response.status, await response.text());
+                alert('Sessão expirada ou acesso negado. Por favor, faça login novamente.');
+                window.location.href = '/'; // Redireciona para a página de login
+            }
+        } catch (error) {
+            // Erro de rede ou outro problema na requisição
+            console.error('Erro de rede ao obter dados do usuário:', error);
+            alert('Erro na comunicação com o servidor ao carregar dados do degustador. Redirecionando para login.');
+            window.location.href = '/';
+        }
+    }
+
+    // --- Inicialização: Chame a função quando a página carregar ---
+    document.addEventListener('DOMContentLoaded', () => {
+        preencherDegustadorLogado(); // Preenche o ID do degustador
+        carregarReceitas(); // Carrega as receitas (você já tinha isso)
+    });  
 
 function renderizarEstrelas() {
   const container = document.getElementById("estrelas");
@@ -372,7 +409,6 @@ function mostrarReceitas(receitas) {
   });
 }
 
-// 🎯 Filtro em tempo real
 document.getElementById('filtroNome').addEventListener('input', function () {
   const termo = this.value.toLowerCase();
 
@@ -416,7 +452,7 @@ function visualizarReceita(id) {
           </ul><br><br>
         <p><strong>Modo de preparo:</strong> ${r.preparo}</p><br>
         ${!r.nota ? '<p>Sem Avaliação<p/>' 
-          :`<p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br>`}
+          :`<p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br> <p>Degustador: ${r.degustador}</p>`}
 
         
 

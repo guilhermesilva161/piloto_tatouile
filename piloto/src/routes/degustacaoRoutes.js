@@ -10,4 +10,9 @@ router.get('/', degustacaoController.getAllDegustacao);
 // Rota para obter uma degustacaoespecífico pelo ID
 router.get('/:idDegustacao', degustacaoController.getDegustacaoById);
 
+//Rota para Deletar uma degustacação
+router.delete('/:idDegustacao', degustacaoController.deletarDegustacao);
+
+router.put('/:idDegustacao', degustacaoController.updateDegustacao);
+
 module.exports = router;

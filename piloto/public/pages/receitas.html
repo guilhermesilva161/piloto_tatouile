@@ -343,9 +343,9 @@ p.comentario {
 <div id="paginaFormulario" class="hidden">
   <h1 class="center">Cadastrar Nova Receita</h1>
   <form id="formReceita" class="center" enctype="multipart/form-data">
+    <input type="number" id="cozinheiro" placeholder="Cozinheiro" required class="hidden" /><br>
     <input type="text" id="nome_rct" placeholder="Nome Receita" required /><br>
     <input type="date" id="dt_criacao" placeholder="Data de Criação" required /><br>
-    <input type="text" id="cozinheiro" placeholder="Cozinheiro" required /><br>
     <input type="number" id="quantidade_porcao" placeholder="Quantidade Porção" required /><br>   
     <input type="text" id="ind_rec_inedita" placeholder="Receita Inédita (S /N )" required /><br>     
     <input type="text" id="preparo" placeholder="Modo de Preparo" required /><br><br>
@@ -390,7 +390,37 @@ p.comentario {
   <button type="button" onclick="fecharFormularioFoto()">Cancelar</button>
 </form>
 </div>
-<script>
+<script>  
+
+let idVerifica = null; 
+
+async function preencherIDVerifica() {
+    try {
+        const response = await fetch('/api/logged-user-data');
+
+        if (response.ok) {
+            const userData = await response.json();
+            if (userData && userData.id) {
+                idVerifica = userData.id;
+                console.log('ID do funcionário (idVerifica) preenchido com:', idVerifica);
+            } else {
+                console.error('Dados do usuário não contêm ID válido para idVerifica.', userData);
+            }
+        } else {
+            console.error('Falha ao obter dados do usuário para idVerifica:', response.status, await response.text());
+        }
+    } catch (error) {
+        console.error('Erro de rede ao obter dados do funcionário para idVerifica:', error);
+    }
+}
+
+//Inicialização da página
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Espera ID do funcionário ser preenchido
+    await preencherIDVerifica(); 
+    //Depois carrega as receitas
+    carregarReceitas(); 
+});
 
 function formulario2(idReceita){
   document.getElementById('opcao2').classList.remove('hidden');
@@ -421,34 +451,44 @@ function carregarReceitas() {
 }
 
 function mostrarReceitas(receitas) {
-  const galeria = document.getElementById('galeriaReceitas');
-  galeria.innerHTML = ''; // limpa os cards anteriores
+    const galeria = document.getElementById('galeriaReceitas');
+    galeria.innerHTML = ''; // limpa os cards anteriores
 
-  receitas.forEach(r => {
-    const card = document.createElement('div');
-    card.classList.add('card-receita');
+    receitas.forEach(r => {
+        const card = document.createElement('div');
+        card.classList.add('card-receita');
 
-    const foto = r.fotoBase64
-      ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome_rct}" />`
-      : `<div style="width: 180px; height: 180px; display:flex; align-items:center; justify-content:center; background-color:#999; border-radius:10px;">
-          <button type="button" onclick="adicionarFoto(${r.idReceita})"> <span>Sem foto</span></button>
-         </div>`;
+        const foto = r.fotoBase64
+            ? `<img src="data:image/jpeg;base64,${r.fotoBase64}" alt="Foto de ${r.nome_rct}" />`
+            : `<div style="width: 180px; height: 180px; display:flex; align-items:center; justify-content:center; background-color:#999; border-radius:10px;">
+                <button type="button" onclick="adicionarFoto(${r.idReceita})"> <span>Sem foto</span></button>
+               </div>`;
 
-    card.innerHTML = `
-      ${foto}
-      <h3>${r.nome_rct}</h3>
-      <p>Chefe: ${r.cozinheiro}</p>
-      <p>Categoria: ${r.nome_categoria}</p>
-      <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
-      <button onclick="editarReceita(${r.idReceita})">Editar</button>
-      <button onclick="excluirReceita(${r.idReceita})">Excluir</button>
-    `;
+        // Lógica para "Editar" e "Excluir"
+        let botoesEdicaoExclusao = '';
+        // Verifica o idVerifica existe (usuário logado) E se o ID do cozinheiro da receita
+        if (idVerifica !== null && r.FKcozinheiro == idVerifica) {
+            botoesEdicaoExclusao = `
+                <div class="card-actions">
+                    <button onclick="editarReceita(${r.idReceita})">Editar</button>
+                    <button onclick="excluirReceita(${r.idReceita})">Excluir</button>
+                </div>
+            `;
+        }
 
-    galeria.appendChild(card);
-  });
+        card.innerHTML = `
+            ${foto}
+            <h3>${r.nome_rct}</h3>
+            <p>Chefe: ${r.cozinheiro}</p>
+            <p>Categoria: ${r.nome_categoria}</p>
+            <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
+            ${botoesEdicaoExclusao} `;
+
+        galeria.appendChild(card);
+    });
 }
 
-// Filtro de receitas por nome
+// Filtro de receitas por nome, cozinheiro e categoria
 document.getElementById('filtroNome').addEventListener('input', function () {
   const termo = this.value.toLowerCase();
 
@@ -519,7 +559,7 @@ function editarReceita(id) {
 container.innerHTML = '';
 container.classList.remove('hidden');
 
-// Verifica se há ingredientes
+// Verifica se tem ingredientes
 if (r.ingredientes && r.ingredientes.length > 0) {
   r.ingredientes.forEach(ing => {
     const grupo = document.createElement('div');
@@ -533,7 +573,7 @@ if (r.ingredientes && r.ingredientes.length > 0) {
 
     container.appendChild(grupo);
 
-    // Preenche os selects com dados
+    // Preenche os selects com dados existentes
     carregarIngredientesNoSelect(grupo.querySelector('select[name="FKidIngrediente"]')).then(() => {
       grupo.querySelector('select[name="FKidIngrediente"]').value = ing.idIngrediente;
     });
@@ -604,8 +644,8 @@ function carregarCategoriaNoSelect(select) {
 
       data.forEach(categ=> {
         const option = document.createElement('option');
-        option.value = categ.idCategoria;          // o valor enviado no formulário é o id
-        option.textContent = categ.nome;  // o texto visível é a descrição
+        option.value = categ.idCategoria;          // o valor enviado no formulário (id)
+        option.textContent = categ.nome;
         select.appendChild(option);
       });
     })
@@ -661,7 +701,7 @@ function carregarIngredientesDaReceita(idReceita) {
           grupo.querySelector('input[name="quant_ingrediente"]').value = ing.quant_ingrediente;
         });
 
-      // Mostrar o container que pode estar escondido
+      // Mostrar o container que estiver hidden
       container.classList.remove('hidden');
     })
     .catch(err => {
@@ -682,7 +722,46 @@ function mostrarFormularioCriar() {
 
   document.getElementById('paginaTabela').classList.add('hidden');
   document.getElementById('paginaFormulario').classList.remove('hidden');
+
+preencherChefeLogado();
+
+  
+
 }
+
+ async function preencherChefeLogado() {
+        try {
+            // Chama a rota, navegador enviará o cookie JWT automaticamente.
+            const response = await fetch('/api/logged-user-data');
+
+            if (response.ok) {
+                const userData = await response.json();
+                if (userData && userData.id) {
+                    // Preenche o campo FKdegustador com o ID do usuário logado
+                    document.getElementById('cozinheiro').value = userData.id;
+                    console.log('ID do Degustador preenchido automaticamente:', userData.id);
+                } else {
+                    console.error('Dados do usuário não contêm ID válido.');
+                    alert('Não foi possível obter o ID do degustador. Por favor, faça login novamente.');
+                    window.location.href = '/'; // Redireciona se não conseguir o ID
+                }
+            } else {
+                //  Se o cookie for expirado ou o acesso foi negado.
+                console.error('Falha ao obter dados do usuário:', response.status, await response.text());
+                alert('Sessão expirada ou acesso negado. Por favor, faça login novamente.');
+                window.location.href = '/'; // Redireciona para a página de login
+            }
+        } catch (error) {
+            // Erro de rede ou outro problema na requisição
+            console.error('Erro de rede ao obter dados do usuário:', error);
+            alert('Erro na comunicação com o servidor ao carregar dados do degustador. Redirecionando para login.');
+            window.location.href = '/';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarReceitas(); // Carrega as receitas
+    });
 
   function mostrarFormularioEditar() {
     carregarMedidasNoSelect();
@@ -720,7 +799,7 @@ function exibirEstrelas(nota) {
   let html = "";
 
   if (nota == null || isNaN(nota)) {
-    // Se não houver nota, exibe 1 estrela cinza ou uma mensagem
+    // Se não houver nota, exibe 1 estrela cinza
     html = `<span class="estrela sem-nota">★</span>`;
     return html;
   }
@@ -748,7 +827,7 @@ function visualizarReceita(id) {
       const dataFormatadaDeg = formatarData(r.data_deg);
 
       
-      // Mostrar os dados em texto (sem input)
+      //Exibe os dados em texto
       const html = `
       
         

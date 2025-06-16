@@ -59,16 +59,16 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             // Redireciona para as rotas do BACKEND que servem as páginas HTML PROTEGIDAS
             // Agora, quando o navegador fizer a requisição para essas URLs, o cookie 'jwt' será enviado AUTOMATICAMENTE.
             switch (cargo) {
-                case '1':
+                case 'Administrador':
                     window.location.href = '/api/dashboard-adm';
                     break;
-                case '2':
+                case 'Chefe':
                     window.location.href = '/api/dashboard-chefe';
                     break;
-                case '4':
+                case 'Degustador':
                     window.location.href = '/api/dashboard-degustador';
                     break;
-                case '6':
+                case 'Editor':
                     window.location.href = '/api/dashboard-editor';
                     break;
                 default:

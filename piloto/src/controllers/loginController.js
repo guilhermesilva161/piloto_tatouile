@@ -14,9 +14,10 @@ async function verificarLogin(req, res) {
         if (usuario) {
             const token = jwt.sign(
                 {
-                    id: usuario.idUsuarios,
+                    id: usuario.idFuncionario,
                     email: usuario.email,
-                    cargo: usuario.cargo
+                    cargo: usuario.cargo,
+                    nome: usuario.nome
                 },
                 JWT_SECRET,
                 { expiresIn: '1h' } // Token expira em 1 hora

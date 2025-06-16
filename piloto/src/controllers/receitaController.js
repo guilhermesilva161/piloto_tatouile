@@ -53,6 +53,7 @@ exports.getReceitaById = async (req, res) => {
       SELECT 
         r.*, 
         f.nome AS cozinheiro,
+        fd.nome AS degustador,
         f.idFuncionario AS FKcozinheiro,
         f.nome_fantasia,
         cat.nome AS nome_categoria,
@@ -65,6 +66,7 @@ exports.getReceitaById = async (req, res) => {
       JOIN Categoria cat ON r.FKcategoria = cat.idCategoria
       LEFT JOIN Foto_Receita fr ON fr.FKidReceita = r.idReceita
       LEFT JOIN Degustacao deg ON deg.FKnome_rct = r.nome_rct AND deg.FKcozinheiro = r.cozinheiro
+      LEFT JOIN Funcionario fd ON deg.FKdegustador = fd.idFuncionario
       WHERE r.idReceita = ?
     `;
 

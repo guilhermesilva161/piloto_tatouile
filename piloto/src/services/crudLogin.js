@@ -5,7 +5,7 @@ async function verificarLogin(email, senha) {
     try {
         console.log(`Verificando login para: ${email}`);
         const query = `
-            SELECT u.idUsuarios, u.email, u.senha, f.nome, idCargo AS cargo
+            SELECT u.idUsuarios, u.email, u.senha, f.nome,f.idFuncionario, c.descricao AS cargo
             FROM Usuarios u
             JOIN Funcionario f ON u.FKfuncionario = f.idFuncionario
             JOIN Cargo c ON f.Cargo_idCargo = c.idCargo
