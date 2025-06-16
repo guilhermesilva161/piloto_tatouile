@@ -3,7 +3,8 @@
 - MySQL (Biblioteca de MySQLpara Node.js)
 - Express (Server Node.js)
 - Multer (Para lidar com envio de imagens por Node.js)
-
+- JWT (JsonWebToken Toke para acesso das paginas na web)
+- Cookie-Parser (Para lida com os cookies)
 ## Requisitos
 
 Para executar esse projeto irá precisar de [Node.js](https://nodejs.org/pt)
@@ -24,6 +25,8 @@ Após isso baixe as bibliotecas com o node
     npm install mysql2
     npm install express
     npm install multer
+    npm install jsonwebtoken
+    npm install cookie-parser
 
 ```
 
@@ -40,6 +43,7 @@ Agora configure o banco de dados de acordo como você abriu em sua máquina, ap�
 Para rodar o do projeto, use o comando:
 
 ```bash
+    cd piloto
     npm start
 ```
 
