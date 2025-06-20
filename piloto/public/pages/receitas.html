@@ -227,12 +227,12 @@
 }
 
 .card-receita {
-  background-color: #000d4d;
+  background-color: white;
   border-radius: 10px;
   width: 220px;
   height: 425px;
   padding: 15px;
-  color: white;
+  color: #000d4d;
   text-align: center;
   box-shadow: 0 0 10px rgba(0,0,0,0.4);
 }
@@ -242,7 +242,6 @@
   height: 180px;
   object-fit: cover;
   border-radius: 10px;
-  background: #ccc;
 }
 
 .card-receita h3 {
@@ -256,16 +255,39 @@
 }
 
 .card-receita button {
-  display: block;
-  width: 100%;
+  display: inline-block;
+  width: 50%;
   margin: 5px 0;
-  padding: 8px;
+  padding: 3px;
+  border: none;
+  border-radius: 6px;
+  background-color:white;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  display: none;
+  border: 1px solid red;
+}
+
+.card-receita:hover button {
+  display: inline-block;
+  padding: 3px;
   border: none;
   border-radius: 6px;
   background-color: white;
-  color: black;
+  color: white;
   font-weight: bold;
   cursor: pointer;
+  margin: 0 5px;
+  width: auto;
+  flex: 1
+}
+.card-actions{
+  display: flex;
+  justify-content: center; /* centraliza os botões */
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
 }
 #formularioFoto {
   width: 1600px;
@@ -304,7 +326,6 @@ p.comentario {
   box-sizing: border-box;   
   text-align: left;
 }
-
   </style>
 </head>
 <body>
@@ -348,10 +369,15 @@ p.comentario {
   <h1 class="center">Cadastrar Nova Receita</h1>
   <form id="formReceita" class="center" enctype="multipart/form-data">
     <input type="number" id="cozinheiro" placeholder="Cozinheiro" required class="hidden" /><br>
+    <label for="" class="left">Nome da Receita</label> <br>
     <input type="text" id="nome_rct" placeholder="Nome Receita" required /><br>
+    <label for="" class="left">Data de criação</label> <br>
     <input type="date" id="dt_criacao" placeholder="Data de Criação" required /><br>
-    <input type="number" id="quantidade_porcao" placeholder="Quantidade Porção" required /><br>   
+    <label for="" class="left">Quantidade Porção</label> <br>
+    <input type="number" id="quantidade_porcao" placeholder="Quantidade Porção" required /><br> 
+    <label for="" class="left">Receita Inédita ( S / N )</label> <br>  
     <input type="text" id="ind_rec_inedita" placeholder="Receita Inédita (S /N )" required /><br>     
+    <label for="" class="left">Modo de Preparo</label> <br>
     <input type="text" id="preparo" placeholder="Modo de Preparo" required /><br><br>
     <select id="FKcategoria" required>
       <option value="">Selecione a Categoria</option>
@@ -474,8 +500,8 @@ function mostrarReceitas(receitas) {
         if (idVerifica !== null && r.FKcozinheiro == idVerifica) {
             botoesEdicaoExclusao = `
                 <div class="card-actions">
-                    <button onclick="editarReceita(${r.idReceita})">Editar</button>
-                    <button onclick="excluirReceita(${r.idReceita})">Excluir</button>
+                    <button onclick="editarReceita(${r.idReceita})"><img src="../imagens/editar.png" alt="imagem editar"style="width:40px;height:40px"></button>
+                    <button onclick="excluirReceita(${r.idReceita})" style="color:red; font-size:2em">X</button>
                 </div>
             `;
         }
@@ -483,9 +509,9 @@ function mostrarReceitas(receitas) {
         card.innerHTML = `
             ${foto}
             <h3>${r.nome_rct}</h3>
-            <p>Chefe: ${r.cozinheiro}</p>
-            <p>Categoria: ${r.nome_categoria}</p>
-            <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
+            <h5>Chefe: ${r.cozinheiro}</h5>
+            <h5>Categoria: ${r.nome_categoria}</h5>
+            <button onclick="visualizarReceita(${r.idReceita})"><img src="../imagens/olho_preto.png" alt="imagem olho"style="width:40px;height:40px"></button>
             ${botoesEdicaoExclusao} `;
 
         galeria.appendChild(card);

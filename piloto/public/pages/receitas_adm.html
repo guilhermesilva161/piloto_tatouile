@@ -61,6 +61,8 @@
       color: #001060;
       font-weight: bold;
     }
+
+
     .container {
       margin-top: 80px;
       padding: 20px;
@@ -70,6 +72,7 @@
       text-align: left;
       margin-bottom: 20px;
     }
+
     .search-container {
       position: relative;
       width: 400px; /* tamanho menor */
@@ -94,7 +97,6 @@
       height: 20px;
       fill: #888;
     }
-
 
     table {
       width: 100%;
@@ -143,20 +145,22 @@
       text-align: center;
     }
 
-    .add-button {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: white;
-      color: black;
-      font-size: 24px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-    }
+.add-button {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: white;
+  color: black;
+  font-size: 30px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
 
     form input {
       width: 80%;
@@ -223,12 +227,12 @@
 }
 
 .card-receita {
-  background-color: #000d4d;
+  background-color: white;
   border-radius: 10px;
   width: 220px;
   height: 425px;
   padding: 15px;
-  color: white;
+  color: #000d4d;
   text-align: center;
   box-shadow: 0 0 10px rgba(0,0,0,0.4);
 }
@@ -238,7 +242,6 @@
   height: 180px;
   object-fit: cover;
   border-radius: 10px;
-  background: #ccc;
 }
 
 .card-receita h3 {
@@ -252,16 +255,58 @@
 }
 
 .card-receita button {
-  display: block;
-  width: 100%;
+  display: inline-block;
+  width: 50%;
   margin: 5px 0;
-  padding: 8px;
+  padding: 3px;
+  border: none;
+  border-radius: 6px;
+  background-color:white;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  display: none;
+  border: 1px solid red;
+}
+
+.card-receita:hover button {
+  display: inline-block;
+  padding: 3px;
   border: none;
   border-radius: 6px;
   background-color: white;
-  color: black;
+  color: white;
   font-weight: bold;
   cursor: pointer;
+  margin: 0 5px;
+  width: auto;
+  flex: 1
+}
+.card-actions{
+  display: flex;
+  justify-content: center; /* centraliza os botões */
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+#formularioFoto {
+  width: 1600px;
+  height: 650px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #001060;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 2000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  color: white;
+  display: none; /* importante para o toggle funcionar bem */
+}
+
+#formularioFoto.show {
+  display: block;
 }
 span.estrela {
   font-size: 24px;
@@ -281,7 +326,6 @@ p.comentario {
   box-sizing: border-box;   
   text-align: left;
 }
-
 
   </style>
 </head>
@@ -350,11 +394,13 @@ function mostrarReceitas(receitas) {
     card.innerHTML = `
       ${foto}
       <h3>${r.nome_rct}</h3>
-      <p>Chefe: ${r.cozinheiro}</p>
-      <p>Categoria: ${r.nome_categoria}</p>
-      <p>${exibirEstrelas(r.nota)}</p>
-      <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
-    `;
+      <h5>Chefe: ${r.cozinheiro}</h5>
+      <h5>Categoria: ${r.nome_categoria}</h5>
+      <h5>${exibirEstrelas(r.nota)}</h5>
+      <div class="card-actions">
+      <button onclick="visualizarReceita(${r.idReceita})"><img src="../imagens/olho_preto.png" alt="imagem olho"style="width:40px;height:40px"></button>
+      </div>
+      `;
 
     galeria.appendChild(card);
   });

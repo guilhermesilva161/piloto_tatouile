@@ -164,22 +164,20 @@
 }
 
 .card-receita {
-  background-color: #000d4d;
+  background-color: white;
   border-radius: 10px;
   width: 220px;
   height: 425px;
   padding: 15px;
-  color: white;
+  color: #000d4d;
   text-align: center;
   box-shadow: 0 0 10px rgba(0,0,0,0.4);
 }
-
 .card-receita img {
   width: 180px;
   height: 180px;
   object-fit: cover;
   border-radius: 10px;
-  background: #ccc;
 }
 
 .card-receita h3 {
@@ -193,25 +191,39 @@
 }
 
 .card-receita button {
-  display: block;
+  display: none;
   width: 100%;
   margin: 5px 0;
   padding: 8px;
   border: none;
   border-radius: 6px;
-  background-color: white;
+  background-color:white;
   color: black;
   font-weight: bold;
   cursor: pointer;
 }
+.card-receita:hover button {
+  display: inline-block;
+  padding: 3px;
+  border: none;
+  border-radius: 6px;
+  background-color: white;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 0 5px;
+  width: auto;
+  flex: 1
+}
 .card-receita button.avaliar{
-  background-color:#000d4d;
+  background-color:white;
   margin-top: 0px;
-  display: block;
+  display: inline-block;
   width: 100%;
   margin: 5px 0;
   padding: 3px;
 }
+
 .avaliacao-popup {
   position: fixed;
   top: 35%;
@@ -408,12 +420,12 @@ function mostrarReceitas(receitas) {
     card.innerHTML = `
       ${foto}
       <h3>${r.nome_rct}</h3>
-      <p>Chefe: ${r.cozinheiro}</p>
-      <p>Categoria: ${r.nome_categoria}</p>
+      <h5>Chefe: ${r.cozinheiro}</h5>
+      <h5>Categoria: ${r.nome_categoria}</h5>
       ${r.nota != null 
         ? `<p>${exibirEstrelas(r.nota)}</p>` 
         : `<button onclick="avaliarReceita(${r.idReceita})" class ="avaliar"><span class="estrela">★</span></button>`}
-      <button onclick="visualizarReceita(${r.idReceita})">Visualizar</button>
+      <button onclick="visualizarReceita(${r.idReceita})"><img src="../imagens/olho_preto.png" alt="imagem olho"style="width:40px;height:40px"></button>
     `;
 
     galeria.appendChild(card);

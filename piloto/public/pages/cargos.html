@@ -62,7 +62,6 @@
       font-weight: bold;
     }
 
-
     .container {
       margin-top: 80px;
       padding: 20px;
@@ -98,6 +97,7 @@
       fill: #888;
     }
 
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -120,27 +120,23 @@
 
     td {
       color: white;
+      padding: 15px;
+    }
+    td:hover button{
+      display: inline-block;
     }
 
     .hidden {
       display: none;
     }
 
-    input, button {
+    input,button {
       padding: 10px;
       margin: 10px 5px;
       font-size: 16px;
       border-radius: 8px;
       border: none;
     }
-
-    button {
-      cursor: pointer;
-      background-color: white;
-      color: black;
-      font-weight: bold;
-    }
-
     .center {
       text-align: center;
     }
@@ -164,6 +160,21 @@
       width: 80%;
       margin-bottom: 10px;
     }
+    td.opcao .botoes {
+      display: none;
+    }
+
+    tr:hover td.opcao .botoes {
+      display: inline-block;
+      cursor: pointer;
+      color: white;
+      background-color: #000d4d;
+      font-weight: bold;
+      padding: 0px;
+      margin: 2px 10px;
+      font-size: 16px;
+    } 
+
   </style>
 </head>
 <body>
@@ -308,13 +319,15 @@
       tbody.innerHTML = '';
       data.forEach(cargo => {
         const row = document.createElement('tr');
+        row.classList.add('linha-tabela');
         row.innerHTML = `
           <td>${cargo.idCargo}</td>
           <td>${cargo.descricao}</td>
           <td>${cargo.ind_ativo || ''}</td> <!-- Exibe status -->
-          <td>
-            <button class="excluir" onclick="excluirCargo(${cargo.idCargo})">X</button>
-            <button onclick="editarCargo(${cargo.idCargo})">Editar</button>
+          <td class="opcao">
+            <button class="botoes" onclick="editarCargo(${cargo.idCargo})"><img src="../imagens/editar_branco.png" alt="imagem editar" width="23px"></button>
+            <button class="botoes" onclick="excluirCargo(${cargo.idCargo})"style="color:red; font-size:23px">X</button>
+
           </td>
         `;
         tbody.appendChild(row);

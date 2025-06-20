@@ -62,7 +62,6 @@
       font-weight: bold;
     }
 
-
     .container {
       margin-top: 80px;
       padding: 20px;
@@ -73,10 +72,9 @@
       margin-bottom: 20px;
     }
 
-    /* Pesquisa com lupa dentro */
     .search-container {
       position: relative;
-      width: 480px; /* tamanho menor */
+      width: 300px; /* tamanho menor */
       margin-bottom: 20px;
     }
 
@@ -98,6 +96,7 @@
       height: 20px;
       fill: #888;
     }
+
 
     table {
       width: 100%;
@@ -121,27 +120,23 @@
 
     td {
       color: white;
+      padding: 15px;
+    }
+    td:hover button{
+      display: inline-block;
     }
 
     .hidden {
       display: none;
     }
 
-    input, button {
+    input,button {
       padding: 10px;
       margin: 10px 5px;
       font-size: 16px;
       border-radius: 8px;
       border: none;
     }
-
-    button {
-      cursor: pointer;
-      background-color: white;
-      color: black;
-      font-weight: bold;
-    }
-
     .center {
       text-align: center;
     }
@@ -165,6 +160,21 @@
       width: 80%;
       margin-bottom: 10px;
     }
+    td.opcao .botoes {
+      display: none;
+    }
+
+    tr:hover td.opcao .botoes {
+      display: inline-block;
+      cursor: pointer;
+      color: white;
+      background-color: #000d4d;
+      font-weight: bold;
+      padding: 0px;
+      margin: 2px 10px;
+      font-size: 16px;
+    } 
+
   </style>
 </head>
 <body>
@@ -242,14 +252,15 @@
     tbody.innerHTML = '';
     dados.forEach(restaurante => {
       const row = document.createElement('tr');
+      row.classList.add('linha-tabela');
       row.innerHTML = `
         <td>${restaurante.idRestaurante}</td>
         <td>${restaurante.nome}</td>
         <td>${restaurante.contato}</td>
         <td>${restaurante.telefone}</td>
-        <td>
-            <button class="excluir" onclick="excluirRestaurante(${restaurante.idRestaurante})">X</button>
-            <button onclick="editarRestaurante(${restaurante.idRestaurante})">Editar</button>
+        <td class="opcao">
+            <button class="botoes" onclick="editarRestaurante(${restaurante.idRestaurante})"><img src="../imagens/editar_branco.png" alt="imagem editar" width="23px"></button>
+            <button class="botoes" onclick="excluirRestaurante(${restaurante.idRestaurante})"style="color:red; font-size:23px">X</button>
         </td>
       `;
       tbody.appendChild(row);

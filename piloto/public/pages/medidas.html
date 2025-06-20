@@ -120,13 +120,14 @@
 
     td {
       color: white;
+      padding: 15px;
     }
 
     .hidden {
       display: none;
     }
 
-    input, button {
+    input,button {
       padding: 10px;
       margin: 10px 5px;
       font-size: 16px;
@@ -134,11 +135,16 @@
       border: none;
     }
 
-    button {
+    .botoes button {
       cursor: pointer;
-      background-color: white;
-      color: black;
+      color: white;
+      background-color: #000d4d;
       font-weight: bold;
+      padding: 2px;
+      margin: 5px 5px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
     }
 
     .center {
@@ -164,11 +170,27 @@
       width: 80%;
       margin-bottom: 10px;
     }
+    td.opcao .botoes {
+      display: none;
+    }
+
+    tr:hover td.opcao .botoes {
+      display: inline-block;
+      cursor: pointer;
+      color: white;
+      background-color: #000d4d;
+      font-weight: bold;
+      padding: 0px;
+      margin: 2px 10px;
+      font-size: 16px;
+    } 
+
+
   </style>
 </head>
 <body>
 
-    <nav>
+  <nav>
     <button class="back-button"><a href="/api/dashboard-chefe">&#x2190;</a></button> 
     <a href="/api/dashboard-receitas-chefe">Receitas</a>
     <a href="#medidas" class="active">Medidas</a>
@@ -177,6 +199,7 @@
 
   <!-- Página da Tabela -->
   <div id="paginaTabela">
+     <h1>Medidas:</h1>
     <div class="search-container">
       <input
         type="text"
@@ -195,7 +218,6 @@
         />
       </svg>
     </div>
-    <h1>Medidas:</h1>
     <button class="hidden" onclick="mostrarFormulario()">Adicionar Medida</button>
     <table id="tabelaMedida">
       <thead>
@@ -248,12 +270,13 @@
       tbody.innerHTML = '';
       medida.forEach((medida) => {
         const row = document.createElement('tr');
+        row.classList.add('linha-tabela');
         row.innerHTML = `
             <td>${medida.idMedida}</td>
             <td>${medida.descricao}</td>
-            <td>
-                <button class="excluir" onclick="excluirMedida('${medida.idMedida}')">X</button>
-                <button onclick="editarMedida('${medida.idMedida}')">Editar</button>
+            <td class= "opcao">
+              <button class="botoes" onclick="editarMedida('${medida.idMedida}')"> <img src="../imagens/editar_branco.png" alt="imagem editar" width="23px"></button>
+              <button class="botoes" onclick="excluirMedida('${medida.idMedida}')" style="color:red;font-size:23px">X</button>
             </td>
           `;
         tbody.appendChild(row);
