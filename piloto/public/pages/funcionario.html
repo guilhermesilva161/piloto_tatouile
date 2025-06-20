@@ -273,6 +273,7 @@
 
 
 function editarFuncionario(id) {
+  modoEdicao = true;
   fetch(`/api/funcionarios/${id}`)
     .then(res => res.json())
     .then(f => {
@@ -288,7 +289,8 @@ function editarFuncionario(id) {
         document.getElementById('Cargo_idCargo').value = f.Cargo_idCargo;
       }, 100);
 
-      mostrarFormulario();
+      document.getElementById('paginaTabela').classList.add('hidden');
+      document.getElementById('paginaFormulario').classList.remove('hidden');
     })
     .catch(error => console.error('Erro ao carregar funcionário:', error));
 }
@@ -327,6 +329,7 @@ function carregarCargosNoSelect() {
 
   function mostrarFormulario() {
     carregarCargosNoSelect();
+    document.getElementById('formFuncionario').reset();
     document.getElementById('paginaTabela').classList.add('hidden');
     document.getElementById('paginaFormulario').classList.remove('hidden');
   }
