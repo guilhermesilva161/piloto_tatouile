@@ -231,13 +231,17 @@
     <form id="formCargo">
       <input type="number" id="IdCargo" class="hidden" placeholder="ID do cargo"/>
       <br>
-      <input type="text" id="descricao" placeholder="Nome do cargo" required />
+      <label for="">Nome do Cargo</label><br>
+      <input type="text" id="descricao" required />
       <br>
-      <input type="date" id="data_inicio" placeholder="Data de inicio" required />
+      <label for="">Data do Cadastro do Cargo</label><br>
+      <input type="date" id="data_inicio" required />
       <br>
-      <input type="text" id="data_fim" placeholder="Data de fim" />
+      <label for="">Data Fim (Se tiver)</label><br>
+      <input type="text" id="data_fim" />
       <br>
-      <input type="text" id="ind_ativo" placeholder="Ativo ou Inativo" required />
+      <label for="">Status (ativo ou inativo)</label><br>
+      <input type="text" id="ind_ativo" required />
       
       <br>
       <button type="submit">Salvar</button>

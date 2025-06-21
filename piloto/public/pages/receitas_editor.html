@@ -419,7 +419,7 @@ function visualizarReceita(id) {
           </ul><br><br>
         <p class="comentario"><strong>Modo de preparo:</strong> ${r.preparo}</p><br>
                ${!r.nota ? '<p>Sem Avaliação<p/>' 
-          :`<p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br>`}
+          :`<p><strong>Nota Degustação:</strong> ${exibirEstrelas(r.nota)}</p><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br><p><strong>Degustado por: ${r.degustador}</strong></p>`}
 
 
         <button onclick="fecharVisualizacao()">Fechar</button>
