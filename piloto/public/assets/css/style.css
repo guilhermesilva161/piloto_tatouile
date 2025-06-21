@@ -1,6 +1,7 @@
 body{
     background-color: #ECA427;
     background-image: url(../imagens/fundo.png) no-repeat;
+    
 }
 
 #navbar{
@@ -115,21 +116,23 @@ h1{
     border: 1px solid #ccc;
     font-size: 16px;
 }
-.inputs:focus{
-    width: 80%;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 4px;
-    background-color: #ffffff;
-    color: #244999;
-    border: 1px solid #ccc;
-    font-size: 16px;
-}
+.inputs:hover,
+.inputs:focus-visible {
+    background-color: #1e2f73;
+    border-color: #3e84ff;
+    transform: translateY(-3px);
+    box-shadow: -12px 0 24px rgba(100, 160, 255, 0.6),
+    0 6px 20px rgba(62, 132, 255, 0.3);
+        }
 
 .botao{
     padding: 10px;
     width: 30%;
-    background-color: #244999;
+    background-color: #1e2f73;
+    border-color: #3e84ff;
+    transform: translateY(-3px);
+    box-shadow: -12px 0 24px rgba(100, 160, 255, 0.6),
+    0 6px 20px rgba(62, 132, 255, 0.3);
 }
 
 .botao:hover{

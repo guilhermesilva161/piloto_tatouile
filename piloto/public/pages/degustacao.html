@@ -208,7 +208,8 @@
   border: none;
   border-radius: 6px;
   background-color: white;
-  color: white;
+  color: red;
+  font-size: 2em;
   font-weight: bold;
   cursor: pointer;
   margin: 0 5px;
@@ -237,6 +238,22 @@
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
   border-radius: 10px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.avaliacao-popup-editar {
+  position: fixed;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -30%);
+  background: #000937;
+  padding: 20px;
+  z-index: 1000;
+  width: 1250px;
+  height: 800px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  border-radius: 10px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -346,7 +363,6 @@ p.comentario {
                     window.location.href = '/'; // Redireciona se não conseguir o ID
                 }
             } else {
-                // Se a resposta não for OK (ex: 401 Unauthorized, 403 Forbidden),
                 // o cookie pode ter expirado ou o acesso foi negado.
                 console.error('Falha ao obter dados do usuário:', response.status, await response.text());
                 alert('Sessão expirada ou acesso negado. Por favor, faça login novamente.');
@@ -360,7 +376,7 @@ p.comentario {
         }
     }
 
-    // --- Inicialização: Chame a função quando a página carregar ---
+
     document.addEventListener('DOMContentLoaded', () => {
         preencherDegustadorLogado(); // Preenche o ID do degustador
         carregarReceitas(); // Carrega as receitas (você já tinha isso)
@@ -389,7 +405,17 @@ function exibirEstrelas(nota) {
   }
   return html;
 }
-  
+
+const idDegustacao = null;
+function carregarDegustacao(){
+  fetch('/api/degustacao')
+    .then(res => res.json())
+    .then(data => {
+      
+    })
+    .catch(err => console.error('Erro ao carregar receitas:', err));
+
+}
 
 let todasReceitas = [];
 
@@ -423,9 +449,10 @@ function mostrarReceitas(receitas) {
       <h5>Chefe: ${r.cozinheiro}</h5>
       <h5>Categoria: ${r.nome_categoria}</h5>
       ${r.nota != null 
-        ? `<p>${exibirEstrelas(r.nota)}</p>` 
-        : `<button onclick="avaliarReceita(${r.idReceita})" class ="avaliar"><span class="estrela">★</span></button>`}
-      <button onclick="visualizarReceita(${r.idReceita})"><img src="../imagens/olho_preto.png" alt="imagem olho"style="width:40px;height:40px"></button>
+        ? `<p>${exibirEstrelas(r.nota)}<br><button onclick="visualizarReceita(${r.idReceita})"><img src="../imagens/olho_preto.png" alt="imagem olho"style="width:40px;height:40px"></button><br><button onclick="excluirDegustacao(${r.idDeg})" "style="color:red; font-size:23px">X</button></p>` 
+        : `<button onclick="avaliarReceita(${r.idReceita})" class ="avaliar"><span class="estrela">★</span></button><br><button onclick="visualizarReceita(${r.idReceita})"><img src="../imagens/olho_preto.png" alt="imagem olho"style="width:40px;height:40px"></button> `}
+      
+      
     `;
 
     galeria.appendChild(card);
@@ -475,7 +502,9 @@ function visualizarReceita(id) {
           <h3><strong>Modo de preparo:</strong></h3> <br>
         <p class="comentario"> ${r.preparo}</p><br>
         ${!r.nota ? '<p>Sem Avaliação<p/>' 
-          :`<h3> ${exibirEstrelas(r.nota)}</h3><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br> <p><strong>Degustado por: ${r.degustador}</strong></p>`}
+          :`<h3> ${exibirEstrelas(r.nota)}</h3><br><p class="comentario"><strong>Comentário:</strong> ${r.coment}</p><br><p><strong>Data Avaliação:</strong> ${dataFormatadaDeg}</p><br> <p><strong>Degustado por: ${r.degustador}</strong></p>
+          `
+          }
 
         
 
@@ -527,7 +556,7 @@ function avaliarReceita(id) {
 
   const receita = todasReceitas.find(r => r.idReceita === id);
   if (receita) {
-    // Preenche os dados no formulário de avaliação
+    // Preenche os dados no formulário de avaliação;
     document.getElementById("FKcozinheiro").value = receita.FKcozinheiro;
     document.getElementById("FKnome_rct").value = receita.nome_rct;
 
@@ -540,6 +569,26 @@ function avaliarReceita(id) {
 function fecharAvaliacao() {
   document.getElementById("avaliacaoForm").style.display = "none";
 }
+
+
+  function excluirDegustacao(id) {
+  if (confirm('Tem certeza que deseja excluir esta Degustação?')) {
+    fetch(`/api/degustacao/${id}`, {
+      method: 'DELETE'
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Erro ao excluir Degustacao');
+      return res.json();
+    })
+    .then(() => {
+      carregarReceitas(); // atualiza a tabela
+    })
+    .catch(error => console.error('Erro:', error));
+    console.log(id);
+  }
+}
+
+
 
 function renderizarEstrelas() {
   const container = document.getElementById("estrelas");

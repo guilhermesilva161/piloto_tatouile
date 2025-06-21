@@ -494,7 +494,7 @@ function mostrarReceitas(receitas) {
                 <button type="button" onclick="adicionarFoto(${r.idReceita})"> <span>Sem foto</span></button>
                </div>`;
 
-        // Lógica para "Editar" e "Excluir"
+        
         let botoesEdicaoExclusao = '';
         // Verifica o idVerifica existe (usuário logado) E se o ID do cozinheiro da receita
         if (idVerifica !== null && r.FKcozinheiro == idVerifica) {

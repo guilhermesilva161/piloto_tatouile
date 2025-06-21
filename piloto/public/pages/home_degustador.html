@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>Degustador</title>
   <style>
-* {
+    * {
   box-sizing: border-box;
 }
 
@@ -21,13 +21,12 @@ body {
 .container {
   display: flex;
   min-height: 100vh;
-  /* Remover max-width para permitir que ele preencha a tela */
   margin: 0 auto;
   overflow: hidden;
 }
 
 .left-panel {
-  flex: 1.5; /* Dê a ele um pouco mais de flexibilidade para crescer */
+  flex: 1.5; 
   background-color: #030b3d;
   display: flex;
   justify-content: center;
@@ -37,30 +36,28 @@ body {
 }
 
 .eiffel {
-  position: absolute; /* CRUCIAL: Posiciona a imagem em relação ao .container */
-  bottom: 0; /* Começa na parte inferior do container */
-  left: 0; /* Alinha à esquerda do container */
-  height: 100%; /* CRUCIAL: Ocupa 100% da altura do container */
-  width: auto; /* Mantém a proporção da imagem */
-  object-fit: contain; /* Garante que a imagem inteira seja visível sem cortar */
+  position: absolute;
+  bottom: 0; 
+  left: 0;
+  height: 100%; 
+  width: auto; 
+  object-fit: contain; 
   filter: brightness(90%);
   user-select: none;
-  border-radius: 16px; /* Ainda pode ter bordas arredondadas */
-  z-index: 1; /* Garante que a imagem fique atrás do painel esquerdo */
+  border-radius: 16px; 
+  z-index: 1; 
 }
 
 .logo-area {
-  text-align: center; /* Já existe, ajuda com o texto */
-  /* Se você quisesse que a área da logo tivesse uma largura máxima e fosse centralizada */
-  max-width: 400px; /* Exemplo: limite a largura da área da logo */
+  text-align: center; 
+  max-width: 400px;
   margin-left: auto;
   margin-right: auto;
-  /* As margens auto aqui centralizam a logo-area se ela tiver uma max-width */
 }
 
 .remy {
-  width: 300px; /* Considere usar max-width ou porcentagens para melhor responsividade aqui também */
-  height: auto; /* Mantenha a proporção */
+  width: 300px; 
+  height: auto; 
   object-fit: contain;
   user-select: none;
   margin-bottom: 16px;
@@ -68,7 +65,6 @@ body {
 
 .bemvindo {
   font-weight: 400;
-  /* Use clamp para tamanho de fonte responsivo */
   font-size: clamp(1.8rem, 3vw, 2.8rem);
   line-height: 1.2;
   text-align: center;
@@ -82,7 +78,7 @@ body {
 }
 
 .right-panel {
-  flex: 1; /* Permite que ele cresça e diminua */
+  flex: 1; 
   background-color: #060e57;
   border-top-left-radius: 24px;
   border-bottom-left-radius: 24px;
@@ -92,20 +88,18 @@ body {
   flex-direction: column;
   justify-content: center;
   gap: 24px;
-  /* Torne a largura mais flexível */
-  min-width: 300px; /* Um mínimo razoável para telas pequenas */
-  max-width: 600px; /* Um máximo para não ficar muito largo em telas gigantes */
-  width: 40%; /* Sugere uma largura base para telas maiores */
+  min-width: 300px; 
+  max-width: 600px; 
+  width: 40%; 
 }
 
 .menu-button {
-  width: 80%; /* Ocupa mais espaço dentro do painel */
+  width: 80%;
   min-height: 72px;
   background-color: #020e3b;
   border-radius: 12px;
   border: 2px solid transparent;
   padding: 16px 24px;
-  /* Use clamp para tamanho de fonte responsivo */
   font-size: clamp(1rem, 1.5vw, 1.3rem);
   font-weight: 600;
   color: #fff;
@@ -118,7 +112,7 @@ body {
     box-shadow 0.3s ease,
     transform 0.2s ease;
   box-shadow: -20px 0 16px rgba(100, 160, 255, 0.4);
-  margin: 0 auto; /* Centraliza os botões dentro do right-panel */
+  margin: 0 auto; 
 }
 
 .menu-button:hover,
@@ -152,16 +146,16 @@ body {
 /* Media Query para telas muito pequenas, se necessário */
 @media (max-width: 768px) {
   .container {
-    flex-direction: column; /* Empilha os painéis em telas menores */
+    flex-direction: column; 
   }
 
   .right-panel {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-    border-top-right-radius: 24px; /* Adiciona border-radius na parte superior direita */
-    box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5); /* Ajusta a sombra para cima */
-    max-width: 100%; /* Ocupa 100% da largura em telas pequenas */
-    padding: 32px 24px; /* Reduz o padding */
+    border-top-right-radius: 24px; 
+    box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5); 
+    max-width: 100%;
+    padding: 32px 24px; 
   }
 
   .left-panel {
@@ -169,12 +163,12 @@ body {
   }
 
   .remy {
-    width: 200px; /* Reduz o tamanho do Remy em telas menores */
+    width: 200px; 
     height: 200px;
   }
 
   .menu-button {
-    width: 95%; /* Ocupa quase toda a largura em telas pequenas */
+    width: 95%; 
   }
 }
 

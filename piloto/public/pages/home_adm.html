@@ -19,7 +19,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Estilo para elementos somente para leitores de tela (SR-only) */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -34,69 +33,67 @@
         /* Contêiner principal do layout flexível */
         .container {
             display: flex;
-            flex-direction: row; /* Coloca os painéis lado a lado por padrão */
+            flex-direction: row; 
             min-height: 100vh;
-            /* max-width: 1440px; removido para permitir que ocupe a tela toda */
             margin: 0 auto;
             overflow: hidden;
-            position: relative; /* Base para o posicionamento absoluto da Torre Eiffel */
+            position: relative; 
         }
 
         /* Painel Esquerdo (para a logo do Remy) */
         .left-panel {
-            flex: 1.5; /* Ajuste para dar mais espaço ao painel esquerdo */
-            background-color: transparent; /* Permite ver a Torre Eiffel por baixo */
+            flex: 1.5; 
+            background-color: transparent; 
             display: flex;
-            flex-direction: column; /* Organiza o conteúdo verticalmente */
-            justify-content: center; /* Centraliza verticalmente o conteúdo (logo-area) */
-            align-items: center; /* Centraliza horizontalmente o conteúdo (logo-area) */
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
             padding: 32px 16px;
-            min-height: 100vh; /* Garante que o painel ocupe a altura total */
-            z-index: 10; /* Garante que o painel e seu conteúdo fiquem acima da torre */
+            min-height: 100vh; 
+            z-index: 10; 
         }
 
         /* Imagem da Torre Eiffel (posicionada globalmente) */
-        .eiffel-image { /* Renomeada de .eiffel para evitar conflito e ser mais descritiva */
+        .eiffel-image { 
             position: absolute;
             bottom: 0;
-            height: 100%; /* Ocupa a altura total do .container */
-            max-width: 100%; /* Garante que não estique demais horizontalmente */
-            left: 0; /* Alinha à esquerda do container */
-            object-fit: contain; /* Mantém a proporção da imagem */
+            height: 100%; 
+            max-width: 100%; 
+            left: 0; 
+            object-fit: contain;
             filter: brightness(90%);
             user-select: none;
-            z-index: 1; /* Fica atrás dos painéis */
+            z-index: 1;
         }
 
-        /* Área da Logo (Remy e Bem-vindo Chefe) */
+       
         .logo-area {
-            text-align: center; /* Centraliza o conteúdo inline/texto */
-            /* Margens controladas pelo Flexbox do .left-panel */
+            text-align: center; 
             margin-top: 0;
             margin-bottom: 0;
         }
         
         .remy {
-            width: 300px; /* Tamanho padrão do Remy */
-            height: auto; /* Mantém a proporção */
+            width: 300px; 
+            height: auto; 
             object-fit: contain;
             user-select: none;
             margin-bottom: 16px;
-            /* Não é necessário display: block; margin: auto; aqui, pois o align-items do .left-panel já centraliza o .logo-area */
+          
         }
 
-        /* Título principal "Bem-vindo Chefe!" */
-        .bemvindo { /* Classe para o h1 */
+       
+        .bemvindo { 
             font-weight: 400;
-            font-size: clamp(1.8rem, 3vw, 2.8rem); /* Tamanho de fonte responsivo */
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
             line-height: 1.2;
             text-align: center;
-            margin: 0; /* Remove margens padrão do h1 */
+            margin: 0; 
             user-select: none;
-            color: #fff; /* Garante a cor branca para o texto principal */
+            color: #fff;
         }
 
-        .bemvindo strong, .bemvindo span { /* Para o 'Chefe!' */
+        .bemvindo strong, .bemvindo span {
             font-weight: 700;
             display: block;
             margin-top: 8px;
@@ -105,20 +102,20 @@
         /* Painel Direito (com os botões de menu) */
         .right-panel {
             flex: 1;
-            background-color: #060e57; /* Tom azul mais intenso */
+            background-color: #060e57; 
             border-top-left-radius: 24px;
             border-bottom-left-radius: 24px;
             box-shadow: inset 4px 0 15px rgba(0, 0, 0, 0.5);
             padding: 64px 48px;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centraliza os botões verticalmente */
-            align-items: center; /* Centraliza os botões horizontalmente */
-            gap: 24px; /* Espaçamento entre os botões */
+            justify-content: center; 
+            align-items: center; 
+            gap: 24px; 
             min-width: 300px;
-            max-width: 600px; /* Limita a largura máxima para não ficar muito esticado */
-            width: 40%; /* Sugere uma largura base em telas maiores */
-            z-index: 10; /* Garante que o painel e seus botões fiquem acima da torre */
+            max-width: 600px; 
+            width: 40%; 
+            z-index: 10; 
         }
 
         /* Menu de botões */
@@ -128,26 +125,26 @@
             gap: 24px; /* Espaçamento entre os botões */
         }
 
-        .menu-button { /* Consolidado para .menu-button */
-            width: 80%; /* Ocupa mais espaço dentro do painel direito */
+        .menu-button { 
+            width: 80%; 
             min-height: 72px;
             background-color: #020e3b;
             border-radius: 12px;
             border: 2px solid transparent;
             padding: 16px 24px;
-            font-size: clamp(1rem, 1.5vw, 1.3rem); /* Tamanho de fonte responsivo */
+            font-size: clamp(1rem, 1.5vw, 1.3rem);
             font-weight: 600;
             color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Separa texto e ícone */
+            justify-content: space-between; 
             transition: border-color 0.3s ease,
                         background-color 0.3s ease,
                         box-shadow 0.3s ease,
                         transform 0.2s ease;
             box-shadow: -20px 0 16px rgba(100, 160, 255, 0.4);
-            margin: 0 auto; /* Centraliza o botão dentro do right-panel */
+            margin: 0 auto; 
         }
 
         .menu-button:hover,
@@ -171,57 +168,53 @@
         }
 
         .icon-circle img {
-            width: 25px; /* Ajuste o tamanho para caber dentro do círculo */
+            width: 25px; 
             height: 25px;
             object-fit: contain;
             user-select: none;
-            pointer-events: none; /* Para que o clique no botão não seja bloqueado pelo ícone */
+            pointer-events: none; 
         }
 
-        /* Estilos adicionais que estavam no segundo bloco (revistos e incorporados) */
-        /* O estilo 'h1' e '.bemvindo' foram unificados, preferindo o mais flexível com 'clamp()' */
-        /* 'logo-wrapper' e 'logo-img', 'logo-text', 'stars' foram mantidos dos seus estilos originais
-           se não foram substituídos explicitamente pelos novos elementos como '.remy' e '.bemvindo' */
 
         /* Media Query para telas menores (responsividade) */
         @media (max-width: 768px) {
             .container {
-                flex-direction: column; /* Empilha os painéis em telas menores */
+                flex-direction: column; 
             }
 
             .right-panel {
                 border-top-left-radius: 0;
                 border-bottom-left-radius: 0;
-                border-top-right-radius: 24px; /* Adiciona border-radius na parte superior direita */
-                box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5); /* Ajusta a sombra para cima */
-                max-width: 100%; /* Ocupa 100% da largura em telas pequenas */
-                padding: 32px 24px; /* Reduz o padding */
+                border-top-right-radius: 24px;
+                box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5); 
+                max-width: 100%;
+                padding: 32px 24px;
             }
 
             .left-panel {
                 padding: 24px 16px;
-                background-color: #030b3d; /* Garante o fundo original em telas pequenas */
-                /* Centraliza a logo no topo do painel esquerdo quando empilhado */
+                background-color: #030b3d; 
+              
                 justify-content: center; 
                 align-items: center;
             }
 
             .remy {
-                width: 200px; /* Reduz o tamanho do Remy em telas menores */
+                width: 200px; 
                 height: 200px;
             }
 
             .menu-button {
-                width: 95%; /* Ocupa quase toda a largura em telas pequenas */
+                width: 95%; 
             }
 
             /* Em telas pequenas, a torre Eiffel deve voltar ao fluxo normal para não sobrepor */
             .eiffel-image {
-                position: relative; /* Volta ao fluxo normal do documento */
-                height: auto; /* Altura automática para se ajustar */
-                width: 100%; /* Ocupa a largura total do container */
-                margin: 20px auto; /* Adiciona margem vertical e centraliza */
-                object-fit: contain; /* Mantém a proporção */
+                position: relative; 
+                height: auto; 
+                width: 100%; 
+                margin: 20px auto; 
+                object-fit: contain; 
             }
         }
     </style>

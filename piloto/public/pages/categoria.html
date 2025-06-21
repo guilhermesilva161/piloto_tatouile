@@ -191,7 +191,25 @@
   <!-- Página da Tabela -->
   <div id="paginaTabela">
     <h1>Categorias:</h1>
-    <button class = "hidden" onclick="mostrarFormulario()">Adicionar Categoria</button>
+
+    <div class="search-container">
+      <input
+        type="text"
+        id="filtroNome"
+        placeholder="Pesquisar Categoria pelo Nome"
+      />
+      <svg
+        class="icon-lupa"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"
+        />
+      </svg>
+    </div>
     <table id="tabelaCategoria">
       <thead>
         <tr>
