@@ -15,16 +15,16 @@ exports.salvarDegustacao = async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    await pool.query(sql, [
-      nota_degustacao,
-      data_degustacao,
-      FKnome_rct,
-      FKcozinheiro,
-      FKdegustador,
-      comentario
+      const [result] = await pool.query(sql, [
+        nota_degustacao,
+        data_degustacao,
+        FKnome_rct,
+        FKcozinheiro,
+        FKdegustador,
+        comentario
     ]);
 
-    return res.status(201).json({ mensagem: 'Avaliação salva com sucesso!' });
+    return res.status(201).json({id: result.insertId, mensagem: 'Avaliação salva com sucesso!' });
   }
 
 

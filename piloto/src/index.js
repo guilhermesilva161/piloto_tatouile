@@ -60,7 +60,10 @@ app.get('/', (req, res) => {
 });
 
 // Inicializando o servidor
-app.listen(3000, () =>{
-    console.log("O servidor está online, Tela login exibida");
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(3000, () => {
+    console.log('Servidor rodando na porta 3000');
+  });
+}
 
+module.exports = app;

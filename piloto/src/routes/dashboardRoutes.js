@@ -78,7 +78,6 @@ router.get('/logged-user-data', verificarToken, (req, res) => {
             nome: req.usuario.nome || '' // Se o nome estiver no JWT
         });
     } else {
-        // Isso não deveria acontecer se verificarToken passou, mas é um fallback
         res.status(401).json({ erro: 'Usuário não autenticado.' });
     }
 });
