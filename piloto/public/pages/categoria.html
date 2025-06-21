@@ -242,30 +242,45 @@
 
     
   const tbody = document.querySelector('#tabelaCategoria tbody');
+    let categoriaCarregadas = [];
 
-  function carregarCategoria() {
-    fetch('/api/categoria')
-      .then(response => response.json())
-      .then(data => {
-        tbody.innerHTML = '';
-        data.forEach(categoria => {
-          const row = document.createElement('tr');
-          row.classList.add('linha-tabela');
-          row.innerHTML = `
+  
+    function carregarCategoria() {
+      fetch('/api/categoria')
+        .then((response) => response.json())
+        .then((data) => {
+          categoriaCarregadas = data; // armazena os dados
+          mostrarCategorias(data);
+        })
+        .catch((error) => {
+          console.error('Erro ao buscar dados:', error);
+        });
+    }
+
+        function mostrarCategorias(categoria) {
+      tbody.innerHTML = '';
+      categoria.forEach((categoria) => {
+        const row = document.createElement('tr');
+        row.classList.add('linha-tabela');
+        row.innerHTML = `
             <td>${categoria.idCategoria}</td>
             <td>${categoria.nome}</td>
-            <td class="opcao">
-              <button class="botoes" onclick="editarCategoria(${categoria.idCategoria})"><img src="../imagens/editar_branco.png" alt="imagem editar" width="23px"></button>
-              <button class="botoes" onclick="excluirCategoria(${categoria.idCategoria})"style="color:red; font-size:23px">X</button>
+            <td class= "opcao">
+              <button class="botoes" onclick="editarCategoria('${categoria.idCategoria}')"> <img src="../imagens/editar_branco.png" alt="imagem editar" width="23px"></button>
+              <button class="botoes" onclick="excluirCategoria('${categoria.idCategoria}')" style="color:red;font-size:23px">X</button>
             </td>
           `;
-          tbody.appendChild(row);
-        });
-      })
-      .catch(error => {
-        console.error('Erro ao buscar dados:', error);
+        tbody.appendChild(row);
       });
-  }
+    }
+
+      document.getElementById('filtroNome').addEventListener('input', function () {
+      const filtro = this.value.toLowerCase();
+      const filtrados = categoriaCarregadas.filter((c) =>
+        c.nome.toLowerCase().startsWith(filtro)
+      );
+      mostrarCategorias(filtrados);
+    });
 
 
   function excluirCategoria(id) {
